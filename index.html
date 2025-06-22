@@ -1,385 +1,543 @@
 <!DOCTYPE html>
 <!--
-🗿 SIMPLE STATUE IN SPACE
+🎨 TRIPPY VISUALS GALLERY
 =====================================
 
-✨ FEATURES:
-- Elegant Marble Statue: Classical sculpture with realistic marble material and texturing
-- Deep Space Environment: Star field background with distant galaxies and nebulae
-- Dramatic Lighting: Multiple colored lights creating sculptural shadows and highlights
-- Smooth Orbital Camera: Gentle rotation around the statue for contemplative viewing
-- Minimalist Design: Clean, focused composition emphasizing the statue's form
-- Realistic Materials: PBR marble with subsurface scattering and surface imperfections
-- Atmospheric Particles: Subtle cosmic dust and floating particles around the statue
-- Dynamic Shadows: High-quality shadow mapping with soft edges
+A curated collection of advanced Three.js visualizations exploring:
+- Realistic ecosystems and natural phenomena
+- Space environments and cosmic scenes
+- Mathematical patterns and geometric art
+- Interactive 3D experiences and simulations
 
-🎮 INTERACTIONS:
-- Mouse drag: Orbit around the statue
-- Mouse wheel: Zoom in/out for detail examination
-- Auto-rotation: Gentle automatic camera movement for meditative viewing
-- Spacebar: Cycle through different lighting moods
-
-🎨 VISUAL EFFECTS:
-- Marble Material: Realistic stone surface with veining and translucency
-- Cosmic Lighting: Multiple colored light sources creating dramatic shadows
-- Star Field: Procedural starfield with twinkling effects
-- Particle Atmosphere: Floating cosmic dust with gentle movement
-- Depth of Field: Focus effects highlighting the statue's details
-- Rim Lighting: Edge highlighting to separate statue from space background
-
-🔧 TECHNOLOGY:
-- PBR Materials: Physically Based Rendering for realistic marble appearance
-- High-Resolution Shadows: 4K shadow mapping for crisp detail
-- Procedural Geometry: Custom statue geometry with natural proportions
-- Particle Systems: GPU-efficient cosmic dust rendering
-- Advanced Lighting: Multiple directional and point lights with color temperature
-- Smooth Animation: Optimized render loop for 60fps performance
-
-A contemplative space scene featuring a classical statue in the cosmic void.
+Each visualization demonstrates cutting-edge web graphics techniques
+including instanced rendering, PBR materials, particle systems,
+and advanced lighting for immersive digital experiences.
 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statue in Space</title>
+    <title>Trippy Visuals - Interactive 3D Gallery</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            background: #000011;
-            font-family: 'Arial', sans-serif;
+            box-sizing: border-box;
         }
-        canvas {
-            display: block;
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
         }
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px;
-            border-radius: 5px;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 0;
+        }
+        
+        h1 {
+            font-size: 3.5em;
+            font-weight: 300;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1em;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        #controls {
+        
+        .card::before {
+            content: '';
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 8px;
-            border-radius: 5px;
-            backdrop-filter: blur(5px);
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-icon {
+            font-size: 2em;
+            margin-right: 15px;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .card-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .card-subtitle {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin: 5px 0 15px 0;
+        }
+        
+        .card-description {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .card-features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        
+        .card-features li {
+            padding: 3px 0;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .card-features li::before {
+            content: '✨ ';
+            margin-right: 5px;
+        }
+        
+        .card-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .dev-section {
+            margin-top: 60px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dev-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4ecdc4;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            margin-top: 10px;
+            transition: opacity 0.3s ease;
+        }
+        
+        .github-link:hover {
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5em; }
+            .gallery { grid-template-columns: 1fr; }
+            .container { padding: 15px; }
         }
     </style>
 </head>
 <body>
-    <div id="info">
-        Statue in Space<br>
-        <small>Classical Sculpture • Cosmic Setting</small>
-    </div>
-    
-    <div id="controls">
-        Drag to orbit • Scroll to zoom • Spacebar: Change lighting
-    </div>
+    <div class="container">
+        <header>
+            <h1>Trippy Visuals</h1>
+            <div class="subtitle">Interactive 3D Experiences</div>
+            <div class="description">
+                A collection of advanced Three.js visualizations exploring realistic ecosystems, 
+                cosmic environments, mathematical patterns, and immersive digital art experiences.
+            </div>
+        </header>
 
-    <!-- Three.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+        <div class="gallery">
+            <!-- Enhanced Grass Ecosystem -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🌱</div>
+                    <div>
+                        <h3 class="card-title">Enhanced Grass Ecosystem</h3>
+                        <div class="card-subtitle">Multi-Species • Wildlife • Dynamic Weather</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    A living ecosystem with 60,000 grass blades across 3 species, 200 wildflowers, 
+                    and 15 flying insects. Features dynamic weather, time-of-day cycles, and 
+                    realistic wind simulation.
+                </div>
+                <ul class="card-features">
+                    <li>60,000+ instanced grass blades</li>
+                    <li>Butterflies and bees with flight patterns</li>
+                    <li>Dynamic lighting and weather</li>
+                    <li>Interactive disturbance effects</li>
+                </ul>
+                <div class="card-buttons">
+                    <a href="backups/enhanced-grass-ecosystem.html" class="btn btn-primary">
+                        🚀 Experience
+                    </a>
+                </div>
+            </div>
+
+            <!-- Simple Statue in Space -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🗿</div>
+                    <div>
+                        <h3 class="card-title">Statue in Space</h3>
+                        <div class="card-subtitle">Classical Sculpture • Cosmic Setting</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    A contemplative marble statue floating in the cosmic void, surrounded by 
+                    10,000 stars with dramatic three-point lighting and multiple mood settings.
+                </div>
+                <ul class="card-features">
+                    <li>Realistic marble PBR materials</li>
+                    <li>10,000 star procedural starfield</li>
+                    <li>4 dynamic lighting moods</li>
+                    <li>Floating cosmic particles</li>
+                </ul>
+                <div class="card-buttons">
+                    <a href="backups/simple-statue-in-space.html" class="btn btn-primary">
+                        🚀 Experience
+                    </a>
+                </div>
+            </div>
+
+            <!-- Solar System -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🪐</div>
+                    <div>
+                        <h3 class="card-title">Solar System Simulation</h3>
+                        <div class="card-subtitle">Realistic Orbital Mechanics</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Complete solar system with 8 planets, moons, asteroid belt, and 5000-star 
+                    background. Features realistic orbital mechanics and dynamic lighting.
+                </div>
+                <ul class="card-features">
+                    <li>8 planets with realistic orbits</li>
+                    <li>Jupiter and Saturn ring systems</li>
+                    <li>Earth's moon with orbital animation</li>
+                    <li>Asteroid belt and starfield</li>
+                </ul>
+                <div class="card-buttons">
+                    <a href="backups/solar-system.html" class="btn btn-primary">
+                        🚀 Experience
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alien Planet Flythrough -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🌌</div>
+                    <div>
+                        <h3 class="card-title">Alien Planet Flythrough</h3>
+                        <div class="card-subtitle">Cinematic Journey • Dual Celestial Events</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Fly through an alien mountain landscape during simultaneous sunset and moonrise, 
+                    with atmospheric particles and dynamic sky color transitions.
+                </div>
+                <ul class="card-features">
+                    <li>Procedural mountain terrain</li>
+                    <li>Simultaneous sunset and moonrise</li>
+                    <li>2000 atmospheric particles</li>
+                    <li>Dynamic flight path controls</li>
+                </ul>
+                <div class="card-buttons">
+                    <a href="backups/alien-planet-detailed.html" class="btn btn-primary">
+                        🚀 Experience
+                    </a>
+                </div>
+            </div>
+
+            <!-- Synthwave Valley -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🌄</div>
+                    <div>
+                        <h3 class="card-title">Synthwave Valley</h3>
+                        <div class="card-subtitle">Retro-Futuristic • Valley Cruise</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Cruise through a structured mountain valley with synthwave aesthetics, 
+                    banking effects, and atmospheric depth-based opacity fading.
+                </div>
+                <ul class="card-features">
+                    <li>Linear valley flight path</li>
+                    <li>Synthwave color palette</li>
+                    <li>Realistic banking effects</li>
+                    <li>Atmospheric perspective</li>
+                </ul>
+                <div class="card-buttons">
+                    <a href="backups/synthwave-valley-enhanced.html" class="btn btn-primary">
+                        🚀 Experience
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mathematical Patterns -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🌀</div>
+                    <div>
+                        <h3 class="card-title">Mathematical Rainbow Spirals</h3>
+                        <div class="card-subtitle">Dynamic Patterns • Color Cycling</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Contemplative mathematical visualization featuring golden ratio spirals, 
+                    polar roses, and parametric curves with dynamic rainbow color cycling.
+                </div>
+                <ul class="card-features">
+                    <li>Golden ratio mathematics</li>
+                    <li>5 dynamic color palettes</li>
+                    <li>Logarithmic and polar patterns</li>
+                    <li>Smooth animation cycles</li>
+                </ul>
+                <div class="card-buttons">
+                    <a href="backups/mathematical-rainbow-spirals.html" class="btn btn-primary">
+                        🚀 Experience
+                    </a>
+                </div>
+            </div>
+
+            <!-- 3D Sculpture Garden -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎨</div>
+                    <div>
+                        <h3 class="card-title">3D Sculpture Garden</h3>
+                        <div class="card-subtitle">Floating Geometric Art</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    20 floating geometric sculptures with varied materials, dynamic lighting, 
+                    and 1000-particle system in an interactive 3D art gallery.
+                </div>
+                <ul class="card-features">
+                    <li>20 geometric sculptures</li>
+                    <li>4 different material types</li>
+                    <li>Dynamic 3D lighting system</li>
+                    <li>Interactive orbit controls</li>
+                </ul>
+                <div class="card-buttons">
+                    <a href="backups/threejs-floating-sculpture-garden.html" class="btn btn-primary">
+                        🚀 Experience
+                    </a>
+                </div>
+            </div>
+
+            <!-- Geometric Patterns -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📐</div>
+                    <div>
+                        <h3 class="card-title">Geometric Angular Patterns</h3>
+                        <div class="card-subtitle">Right-Angle Focus • Tessellations</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Explore recursive square subdivisions, Islamic tessellations, and 
+                    L-system fractals with a focus on right-angle geometric patterns.
+                </div>
+                <ul class="card-features">
+                    <li>Recursive square patterns</li>
+                    <li>Islamic tessellation designs</li>
+                    <li>L-system fractals</li>
+                    <li>Mobile-optimized shaders</li>
+                </ul>
+                <div class="card-buttons">
+                    <a href="backups/geometric-angular-patterns.html" class="btn btn-primary">
+                        🚀 Experience
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="dev-section">
+            <h2 class="dev-title">
+                <span class="status-indicator"></span>
+                Development Sandbox
+            </h2>
+            <p>Active development workspace for creating new visualizations and experimenting with Three.js techniques.</p>
+            <div style="margin-top: 20px;">
+                <a href="sandbox.html" class="btn btn-secondary">
+                    🛠️ Open Sandbox
+                </a>
+                <a href="debug.html" class="btn btn-secondary">
+                    🐛 Debug Mode
+                </a>
+            </div>
+        </div>
+
+        <footer>
+            <p>Advanced Three.js visualizations exploring the intersection of mathematics, art, and interactive technology.</p>
+            <a href="https://github.com/dougneale/trippy-visuals" class="github-link" target="_blank">
+                <span>⭐</span> View on GitHub
+            </a>
+        </footer>
+    </div>
 
     <script>
-        // Scene setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ 
-            antialias: true, 
-            alpha: false,
-            powerPreference: "high-performance"
+        // Add some interactive sparkle to the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scroll for internal links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Add loading states to buttons
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '🚀 Loading...';
+                    this.style.opacity = '0.7';
+                    
+                    // Reset after a short delay (in case user goes back)
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.style.opacity = '1';
+                    }, 2000);
+                });
+            });
+
+            console.log('🎨 Trippy Visuals Gallery Loaded');
+            console.log('🚀 Ready to explore interactive 3D experiences');
         });
-        
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setClearColor(0x000011); // Deep space black
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.gammaOutput = true;
-        renderer.gammaFactor = 2.2;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
-        
-        document.body.appendChild(renderer.domElement);
-
-        // Create starfield background
-        function createStarField() {
-            const starGeometry = new THREE.BufferGeometry();
-            const starCount = 10000;
-            const positions = new Float32Array(starCount * 3);
-            const colors = new Float32Array(starCount * 3);
-            
-            for (let i = 0; i < starCount; i++) {
-                // Random positions in a large sphere
-                const radius = 800 + Math.random() * 200;
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.acos(2 * Math.random() - 1);
-                
-                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-                positions[i * 3 + 2] = radius * Math.cos(phi);
-                
-                // Star colors - mostly white with some blue and yellow
-                const colorChoice = Math.random();
-                if (colorChoice < 0.7) {
-                    colors[i * 3] = 1; colors[i * 3 + 1] = 1; colors[i * 3 + 2] = 1; // White
-                } else if (colorChoice < 0.85) {
-                    colors[i * 3] = 0.7; colors[i * 3 + 1] = 0.8; colors[i * 3 + 2] = 1; // Blue
-                } else {
-                    colors[i * 3] = 1; colors[i * 3 + 1] = 0.9; colors[i * 3 + 2] = 0.7; // Yellow
-                }
-            }
-            
-            starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            
-            const starMaterial = new THREE.PointsMaterial({
-                size: 2,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.8,
-                sizeAttenuation: false
-            });
-            
-            return new THREE.Points(starGeometry, starMaterial);
-        }
-
-        const stars = createStarField();
-        scene.add(stars);
-
-        // Create statue geometry - simple classical figure
-        function createStatueGeometry() {
-            const group = new THREE.Group();
-            
-            // Base/pedestal
-            const baseGeometry = new THREE.CylinderGeometry(2, 2.2, 0.5, 16);
-            const baseMaterial = new THREE.MeshStandardMaterial({
-                color: 0xcccccc,
-                roughness: 0.3,
-                metalness: 0.1
-            });
-            const base = new THREE.Mesh(baseGeometry, baseMaterial);
-            base.position.y = -3.75;
-            base.castShadow = true;
-            base.receiveShadow = true;
-            group.add(base);
-            
-            // Main body (torso)
-            const torsoGeometry = new THREE.CylinderGeometry(1.2, 1.5, 3, 12);
-            const torso = new THREE.Mesh(torsoGeometry, createMarbleMaterial());
-            torso.position.y = -1.5;
-            torso.castShadow = true;
-            torso.receiveShadow = true;
-            group.add(torso);
-            
-            // Head
-            const headGeometry = new THREE.SphereGeometry(0.8, 16, 16);
-            const head = new THREE.Mesh(headGeometry, createMarbleMaterial());
-            head.position.y = 1;
-            head.castShadow = true;
-            head.receiveShadow = true;
-            group.add(head);
-            
-            // Arms
-            const armGeometry = new THREE.CylinderGeometry(0.3, 0.4, 2.5, 8);
-            
-            const leftArm = new THREE.Mesh(armGeometry, createMarbleMaterial());
-            leftArm.position.set(-1.5, -0.5, 0);
-            leftArm.rotation.z = Math.PI / 6;
-            leftArm.castShadow = true;
-            leftArm.receiveShadow = true;
-            group.add(leftArm);
-            
-            const rightArm = new THREE.Mesh(armGeometry, createMarbleMaterial());
-            rightArm.position.set(1.5, -0.5, 0);
-            rightArm.rotation.z = -Math.PI / 6;
-            rightArm.castShadow = true;
-            rightArm.receiveShadow = true;
-            group.add(rightArm);
-            
-            return group;
-        }
-
-        // Create realistic marble material
-        function createMarbleMaterial() {
-            return new THREE.MeshStandardMaterial({
-                color: 0xf5f5f5,
-                roughness: 0.2,
-                metalness: 0.05,
-                // Simulate marble translucency
-                emissive: 0x111111,
-                emissiveIntensity: 0.02
-            });
-        }
-
-        // Create the statue
-        const statue = createStatueGeometry();
-        scene.add(statue);
-
-        // Lighting setup
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
-        scene.add(ambientLight);
-
-        // Main key light (warm)
-        const keyLight = new THREE.DirectionalLight(0xffeaa7, 1.5);
-        keyLight.position.set(10, 15, 5);
-        keyLight.castShadow = true;
-        keyLight.shadow.mapSize.width = 4096;
-        keyLight.shadow.mapSize.height = 4096;
-        keyLight.shadow.camera.near = 0.1;
-        keyLight.shadow.camera.far = 50;
-        keyLight.shadow.camera.left = -10;
-        keyLight.shadow.camera.right = 10;
-        keyLight.shadow.camera.top = 10;
-        keyLight.shadow.camera.bottom = -10;
-        keyLight.shadow.bias = -0.0001;
-        scene.add(keyLight);
-
-        // Fill light (cool blue)
-        const fillLight = new THREE.DirectionalLight(0x87ceeb, 0.8);
-        fillLight.position.set(-8, 10, -5);
-        scene.add(fillLight);
-
-        // Rim light (purple)
-        const rimLight = new THREE.DirectionalLight(0xaa88ff, 0.6);
-        rimLight.position.set(0, 5, -15);
-        scene.add(rimLight);
-
-        // Create floating cosmic particles
-        function createCosmicParticles() {
-            const particleGeometry = new THREE.BufferGeometry();
-            const particleCount = 500;
-            const positions = new Float32Array(particleCount * 3);
-            const colors = new Float32Array(particleCount * 3);
-            
-            for (let i = 0; i < particleCount; i++) {
-                positions[i * 3] = (Math.random() - 0.5) * 50;
-                positions[i * 3 + 1] = (Math.random() - 0.5) * 50;
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
-                
-                // Particle colors - subtle blues and purples
-                colors[i * 3] = 0.5 + Math.random() * 0.5;     // R
-                colors[i * 3 + 1] = 0.7 + Math.random() * 0.3; // G
-                colors[i * 3 + 2] = 1.0;                       // B
-            }
-            
-            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            
-            const particleMaterial = new THREE.PointsMaterial({
-                size: 0.5,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.6,
-                blending: THREE.AdditiveBlending
-            });
-            
-            return new THREE.Points(particleGeometry, particleMaterial);
-        }
-
-        const cosmicParticles = createCosmicParticles();
-        scene.add(cosmicParticles);
-
-        // Camera controls
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.enableZoom = true;
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 0.5;
-        controls.minDistance = 5;
-        controls.maxDistance = 50;
-        controls.maxPolarAngle = Math.PI;
-
-        // Set initial camera position
-        camera.position.set(8, 3, 12);
-        controls.target.set(0, 0, 0);
-        controls.update();
-
-        // Lighting modes
-        let lightingMode = 0;
-        const lightingModes = [
-            { key: 0xffeaa7, fill: 0x87ceeb, rim: 0xaa88ff }, // Warm/Cool/Purple
-            { key: 0xff6b35, fill: 0x4ecdc4, rim: 0xffe66d }, // Orange/Teal/Yellow
-            { key: 0x6c5ce7, fill: 0xfd79a8, rim: 0x00b894 }, // Purple/Pink/Green
-            { key: 0xffffff, fill: 0xffffff, rim: 0xffffff }  // Pure white
-        ];
-
-        // Keyboard controls
-        document.addEventListener('keydown', (event) => {
-            if (event.code === 'Space') {
-                event.preventDefault();
-                lightingMode = (lightingMode + 1) % lightingModes.length;
-                const mode = lightingModes[lightingMode];
-                keyLight.color.setHex(mode.key);
-                fillLight.color.setHex(mode.fill);
-                rimLight.color.setHex(mode.rim);
-            }
-        });
-
-        // Animation variables
-        let time = 0;
-
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            time += 0.016;
-
-            // Gentle statue rotation
-            statue.rotation.y += 0.002;
-
-            // Animate cosmic particles
-            const positions = cosmicParticles.geometry.attributes.position.array;
-            for (let i = 0; i < positions.length; i += 3) {
-                positions[i + 1] += Math.sin(time + i * 0.01) * 0.01;
-                positions[i] += Math.cos(time + i * 0.005) * 0.005;
-            }
-            cosmicParticles.geometry.attributes.position.needsUpdate = true;
-
-            // Subtle star twinkling
-            const starColors = stars.geometry.attributes.color.array;
-            for (let i = 0; i < starColors.length; i += 3) {
-                if (Math.random() < 0.001) { // Occasional twinkle
-                    const intensity = 0.5 + Math.random() * 0.5;
-                    starColors[i] *= intensity;
-                    starColors[i + 1] *= intensity;
-                    starColors[i + 2] *= intensity;
-                }
-            }
-            stars.geometry.attributes.color.needsUpdate = true;
-
-            // Update controls
-            controls.update();
-
-            renderer.render(scene, camera);
-        }
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        console.log('🗿 Simple Statue in Space');
-        console.log('Classical sculpture floating in cosmic void');
-        console.log('Press Spacebar to cycle lighting modes');
-        console.log('Drag to orbit, scroll to zoom');
-        
-        // Start the scene
-        animate();
     </script>
 </body>
 </html> 

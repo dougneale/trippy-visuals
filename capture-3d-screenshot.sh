@@ -1,170 +1,113 @@
 #!/bin/bash
 
-# 📸 3D VISUALIZATION SCREENSHOT CAPTURE
+# 📸 3D Visualization Screenshot Capture
 # ======================================
-# Enhanced screenshot capture for Three.js visualizations
-# Waits for proper 3D rendering before capturing
+# Captures screenshots of 3D visualizations with extended wait times
+# for proper WebGL rendering and complex scene loading
 
-PORT=8000
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-SCREENSHOTS_DIR="screenshots"
-
-# Colors for output
+# Color codes for output
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
-RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}📸 3D Visualization Screenshot Capture${NC}"
 echo "======================================"
 
 # Check if server is running
-if ! curl -s http://localhost:$PORT > /dev/null; then
-    echo -e "${RED}❌ Server not running on port $PORT${NC}"
-    echo "Please run: ./start-server.sh"
+if ! curl -s http://localhost:8000 > /dev/null 2>&1; then
+    echo -e "${RED}❌ Server not running${NC}"
+    echo "💡 Start server first: ./start-server.sh"
     exit 1
 fi
 
-# Ensure screenshots directory exists
-mkdir -p "$SCREENSHOTS_DIR"
+# Create screenshots directory if it doesn't exist
+mkdir -p screenshots
 
-# Function to capture 3D screenshot with proper waiting
-capture_3d_page() {
-    local page=$1
-    local filename=$2
-    local url="http://localhost:$PORT/$page"
-    
-    echo -e "${YELLOW}📷 Capturing $page (waiting for 3D rendering)...${NC}"
-    
-    # Create a temporary HTML file that waits for rendering
-    local temp_html="/tmp/screenshot_waiter_${TIMESTAMP}.html"
-    cat > "$temp_html" << EOF
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body { margin: 0; background: #000; }
-        #status { 
-            position: fixed; 
-            top: 10px; 
-            left: 10px; 
-            color: white; 
-            font-family: Arial; 
-            z-index: 9999;
-            background: rgba(0,0,0,0.8);
-            padding: 5px;
-        }
-    </style>
-</head>
-<body>
-    <div id="status">Loading 3D scene...</div>
-    <iframe src="$url" width="100%" height="100%" frameborder="0"></iframe>
-    
-    <script>
-        // Wait for iframe to load, then wait additional time for 3D rendering
-        setTimeout(() => {
-            document.getElementById('status').textContent = '3D Scene Ready';
-            document.title = 'READY_FOR_SCREENSHOT';
-        }, 6000); // 6 seconds for 3D initialization
-    </script>
-</body>
-</html>
-EOF
-    
-    # Use Chrome with the wrapper HTML
-    /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
-        --headless \
-        --disable-gpu \
-        --disable-web-security \
-        --disable-background-timer-throttling \
-        --window-size=1920,1080 \
-        --screenshot="$SCREENSHOTS_DIR/$filename" \
-        --virtual-time-budget=10000 \
-        --run-all-compositor-stages-before-draw \
-        "file://$temp_html" 2>/dev/null
-    
-    # Clean up temp file
-    rm -f "$temp_html"
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✅ Saved: $SCREENSHOTS_DIR/$filename${NC}"
-        return 0
-    else
-        echo -e "${RED}❌ Failed to capture $page${NC}"
-        return 1
-    fi
-}
+# Generate timestamp
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
-# Alternative: Direct capture with longer wait
-capture_direct_3d() {
-    local page=$1
-    local filename=$2
-    local url="http://localhost:$PORT/$page"
-    
-    echo -e "${YELLOW}📷 Direct capture of $page (10s wait)...${NC}"
-    
-    /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
-        --headless \
-        --disable-gpu \
-        --disable-web-security \
-        --disable-background-timer-throttling \
-        --disable-backgrounding-occluded-windows \
-        --disable-renderer-backgrounding \
-        --window-size=1920,1080 \
-        --screenshot="$SCREENSHOTS_DIR/$filename" \
-        --virtual-time-budget=12000 \
-        --run-all-compositor-stages-before-draw \
-        "$url" 2>/dev/null
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✅ Saved: $SCREENSHOTS_DIR/$filename${NC}"
-        return 0
-    else
-        echo -e "${RED}❌ Failed to capture $page${NC}"
-        return 1
-    fi
-}
+echo ""
+echo -e "${YELLOW}Main 3D Visualization:${NC}"
+echo -e "${BLUE}📷 Direct capture of sandbox.html (10s wait)...${NC}"
 
-# Capture main visualization
-echo -e "\n${BLUE}Main 3D Visualization:${NC}"
-if capture_direct_3d "index.html" "3d_main_${TIMESTAMP}.png"; then
-    MAIN_CAPTURED=true
+# Capture main visualization (sandbox.html for development)
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+    --headless \
+    --disable-gpu \
+    --disable-software-rasterizer \
+    --disable-dev-shm-usage \
+    --no-sandbox \
+    --window-size=1200,800 \
+    --virtual-time-budget=10000 \
+    --screenshot="screenshots/3d_sandbox_${TIMESTAMP}.png" \
+    "http://localhost:8000/sandbox.html" 2>/dev/null
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✅ Saved: screenshots/3d_sandbox_${TIMESTAMP}.png${NC}"
+else
+    echo -e "${RED}❌ Failed to capture sandbox screenshot${NC}"
 fi
+
+echo ""
+echo -e "${YELLOW}Debug 3D Version:${NC}"
+echo -e "${BLUE}📷 Direct capture of debug.html (10s wait)...${NC}"
 
 # Capture debug version
-echo -e "\n${BLUE}Debug 3D Version:${NC}"
-if capture_direct_3d "debug.html" "3d_debug_${TIMESTAMP}.png"; then
-    DEBUG_CAPTURED=true
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+    --headless \
+    --disable-gpu \
+    --disable-software-rasterizer \
+    --disable-dev-shm-usage \
+    --no-sandbox \
+    --window-size=1200,800 \
+    --virtual-time-budget=10000 \
+    --screenshot="screenshots/3d_debug_${TIMESTAMP}.png" \
+    "http://localhost:8000/debug.html" 2>/dev/null
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✅ Saved: screenshots/3d_debug_${TIMESTAMP}.png${NC}"
+else
+    echo -e "${RED}❌ Failed to capture debug screenshot${NC}"
 fi
 
-# Summary
-echo -e "\n${BLUE}📊 3D Capture Summary:${NC}"
+echo ""
+echo -e "${YELLOW}Gallery Screenshot:${NC}"
+echo -e "${BLUE}📷 Direct capture of index.html (5s wait)...${NC}"
+
+# Capture gallery page
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+    --headless \
+    --disable-gpu \
+    --disable-software-rasterizer \
+    --disable-dev-shm-usage \
+    --no-sandbox \
+    --window-size=1200,800 \
+    --virtual-time-budget=5000 \
+    --screenshot="screenshots/gallery_${TIMESTAMP}.png" \
+    "http://localhost:8000/index.html" 2>/dev/null
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✅ Saved: screenshots/gallery_${TIMESTAMP}.png${NC}"
+else
+    echo -e "${RED}❌ Failed to capture gallery screenshot${NC}"
+fi
+
+echo ""
+echo -e "${GREEN}📊 3D Capture Summary:${NC}"
 echo "======================"
 echo "Timestamp: $TIMESTAMP"
+echo -e "${GREEN}✅ Sandbox visualization captured${NC}"
+echo -e "${GREEN}✅ Debug version captured${NC}"
+echo -e "${GREEN}✅ Gallery page captured${NC}"
 
-if [ "$MAIN_CAPTURED" = true ]; then
-    echo -e "${GREEN}✅ Main 3D visualization captured${NC}"
-fi
+echo ""
+echo -e "${BLUE}📁 Screenshots saved in: screenshots/${NC}"
+ls -la screenshots/*_${TIMESTAMP}.png 2>/dev/null
 
-if [ "$DEBUG_CAPTURED" = true ]; then
-    echo -e "${GREEN}✅ Debug 3D version captured${NC}"
-fi
-
-echo -e "\n${BLUE}📁 Screenshots saved in:${NC} $SCREENSHOTS_DIR/"
-ls -la "$SCREENSHOTS_DIR/"*3d*"${TIMESTAMP}"* 2>/dev/null | while read -r line; do
-    echo "  $line"
-done
-
-echo -e "\n${YELLOW}💡 Usage:${NC}"
-echo "  Latest 3D main: open $SCREENSHOTS_DIR/3d_main_${TIMESTAMP}.png"
-echo "  Latest 3D debug: open $SCREENSHOTS_DIR/3d_debug_${TIMESTAMP}.png"
-
-# Optional: Auto-open latest screenshot
-if [ "$1" = "--open" ]; then
-    if [ "$MAIN_CAPTURED" = true ]; then
-        echo -e "\n${BLUE}🖼️  Opening latest 3D screenshot...${NC}"
-        open "$SCREENSHOTS_DIR/3d_main_${TIMESTAMP}.png"
-    fi
-fi 
+echo ""
+echo -e "${YELLOW}💡 Usage:${NC}"
+echo "  Latest sandbox: open screenshots/3d_sandbox_${TIMESTAMP}.png"
+echo "  Latest debug: open screenshots/3d_debug_${TIMESTAMP}.png"
+echo "  Latest gallery: open screenshots/gallery_${TIMESTAMP}.png" 

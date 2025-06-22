@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<!--
+🗿 SIMPLE STATUE IN SPACE
+=====================================
+
+✨ FEATURES:
+- Elegant Marble Statue: Classical sculpture with realistic marble material and texturing
+- Deep Space Environment: Star field background with distant galaxies and nebulae
+- Dramatic Lighting: Multiple colored lights creating sculptural shadows and highlights
+- Smooth Orbital Camera: Gentle rotation around the statue for contemplative viewing
+- Minimalist Design: Clean, focused composition emphasizing the statue's form
+- Realistic Materials: PBR marble with subsurface scattering and surface imperfections
+- Atmospheric Particles: Subtle cosmic dust and floating particles around the statue
+- Dynamic Shadows: High-quality shadow mapping with soft edges
+
+🎮 INTERACTIONS:
+- Mouse drag: Orbit around the statue
+- Mouse wheel: Zoom in/out for detail examination
+- Auto-rotation: Gentle automatic camera movement for meditative viewing
+- Spacebar: Cycle through different lighting moods
+
+🎨 VISUAL EFFECTS:
+- Marble Material: Realistic stone surface with veining and translucency
+- Cosmic Lighting: Multiple colored light sources creating dramatic shadows
+- Star Field: Procedural starfield with twinkling effects
+- Particle Atmosphere: Floating cosmic dust with gentle movement
+- Depth of Field: Focus effects highlighting the statue's details
+- Rim Lighting: Edge highlighting to separate statue from space background
+
+🔧 TECHNOLOGY:
+- PBR Materials: Physically Based Rendering for realistic marble appearance
+- High-Resolution Shadows: 4K shadow mapping for crisp detail
+- Procedural Geometry: Custom statue geometry with natural proportions
+- Particle Systems: GPU-efficient cosmic dust rendering
+- Advanced Lighting: Multiple directional and point lights with color temperature
+- Smooth Animation: Optimized render loop for 60fps performance
+
+A contemplative space scene featuring a classical statue in the cosmic void.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statue in Space</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000011;
+            font-family: 'Arial', sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            border-radius: 5px;
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        Statue in Space<br>
+        <small>Classical Sculpture • Cosmic Setting</small>
+    </div>
+    
+    <div id="controls">
+        Drag to orbit • Scroll to zoom • Spacebar: Change lighting
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            alpha: false,
+            powerPreference: "high-performance"
+        });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(0x000011); // Deep space black
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.gammaOutput = true;
+        renderer.gammaFactor = 2.2;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        
+        document.body.appendChild(renderer.domElement);
+
+        // Create starfield background
+        function createStarField() {
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = 10000;
+            const positions = new Float32Array(starCount * 3);
+            const colors = new Float32Array(starCount * 3);
+            
+            for (let i = 0; i < starCount; i++) {
+                // Random positions in a large sphere
+                const radius = 800 + Math.random() * 200;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = radius * Math.cos(phi);
+                
+                // Star colors - mostly white with some blue and yellow
+                const colorChoice = Math.random();
+                if (colorChoice < 0.7) {
+                    colors[i * 3] = 1; colors[i * 3 + 1] = 1; colors[i * 3 + 2] = 1; // White
+                } else if (colorChoice < 0.85) {
+                    colors[i * 3] = 0.7; colors[i * 3 + 1] = 0.8; colors[i * 3 + 2] = 1; // Blue
+                } else {
+                    colors[i * 3] = 1; colors[i * 3 + 1] = 0.9; colors[i * 3 + 2] = 0.7; // Yellow
+                }
+            }
+            
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const starMaterial = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: false
+            });
+            
+            return new THREE.Points(starGeometry, starMaterial);
+        }
+
+        const stars = createStarField();
+        scene.add(stars);
+
+        // Create statue geometry - simple classical figure
+        function createStatueGeometry() {
+            const group = new THREE.Group();
+            
+            // Base/pedestal
+            const baseGeometry = new THREE.CylinderGeometry(2, 2.2, 0.5, 16);
+            const baseMaterial = new THREE.MeshStandardMaterial({
+                color: 0xcccccc,
+                roughness: 0.3,
+                metalness: 0.1
+            });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = -3.75;
+            base.castShadow = true;
+            base.receiveShadow = true;
+            group.add(base);
+            
+            // Main body (torso)
+            const torsoGeometry = new THREE.CylinderGeometry(1.2, 1.5, 3, 12);
+            const torso = new THREE.Mesh(torsoGeometry, createMarbleMaterial());
+            torso.position.y = -1.5;
+            torso.castShadow = true;
+            torso.receiveShadow = true;
+            group.add(torso);
+            
+            // Head
+            const headGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+            const head = new THREE.Mesh(headGeometry, createMarbleMaterial());
+            head.position.y = 1;
+            head.castShadow = true;
+            head.receiveShadow = true;
+            group.add(head);
+            
+            // Arms
+            const armGeometry = new THREE.CylinderGeometry(0.3, 0.4, 2.5, 8);
+            
+            const leftArm = new THREE.Mesh(armGeometry, createMarbleMaterial());
+            leftArm.position.set(-1.5, -0.5, 0);
+            leftArm.rotation.z = Math.PI / 6;
+            leftArm.castShadow = true;
+            leftArm.receiveShadow = true;
+            group.add(leftArm);
+            
+            const rightArm = new THREE.Mesh(armGeometry, createMarbleMaterial());
+            rightArm.position.set(1.5, -0.5, 0);
+            rightArm.rotation.z = -Math.PI / 6;
+            rightArm.castShadow = true;
+            rightArm.receiveShadow = true;
+            group.add(rightArm);
+            
+            return group;
+        }
+
+        // Create realistic marble material
+        function createMarbleMaterial() {
+            return new THREE.MeshStandardMaterial({
+                color: 0xf5f5f5,
+                roughness: 0.2,
+                metalness: 0.05,
+                // Simulate marble translucency
+                emissive: 0x111111,
+                emissiveIntensity: 0.02
+            });
+        }
+
+        // Create the statue
+        const statue = createStatueGeometry();
+        scene.add(statue);
+
+        // Lighting setup
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+        scene.add(ambientLight);
+
+        // Main key light (warm)
+        const keyLight = new THREE.DirectionalLight(0xffeaa7, 1.5);
+        keyLight.position.set(10, 15, 5);
+        keyLight.castShadow = true;
+        keyLight.shadow.mapSize.width = 4096;
+        keyLight.shadow.mapSize.height = 4096;
+        keyLight.shadow.camera.near = 0.1;
+        keyLight.shadow.camera.far = 50;
+        keyLight.shadow.camera.left = -10;
+        keyLight.shadow.camera.right = 10;
+        keyLight.shadow.camera.top = 10;
+        keyLight.shadow.camera.bottom = -10;
+        keyLight.shadow.bias = -0.0001;
+        scene.add(keyLight);
+
+        // Fill light (cool blue)
+        const fillLight = new THREE.DirectionalLight(0x87ceeb, 0.8);
+        fillLight.position.set(-8, 10, -5);
+        scene.add(fillLight);
+
+        // Rim light (purple)
+        const rimLight = new THREE.DirectionalLight(0xaa88ff, 0.6);
+        rimLight.position.set(0, 5, -15);
+        scene.add(rimLight);
+
+        // Create floating cosmic particles
+        function createCosmicParticles() {
+            const particleGeometry = new THREE.BufferGeometry();
+            const particleCount = 500;
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 50;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 50;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+                
+                // Particle colors - subtle blues and purples
+                colors[i * 3] = 0.5 + Math.random() * 0.5;     // R
+                colors[i * 3 + 1] = 0.7 + Math.random() * 0.3; // G
+                colors[i * 3 + 2] = 1.0;                       // B
+            }
+            
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const particleMaterial = new THREE.PointsMaterial({
+                size: 0.5,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+            
+            return new THREE.Points(particleGeometry, particleMaterial);
+        }
+
+        const cosmicParticles = createCosmicParticles();
+        scene.add(cosmicParticles);
+
+        // Camera controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+        controls.minDistance = 5;
+        controls.maxDistance = 50;
+        controls.maxPolarAngle = Math.PI;
+
+        // Set initial camera position
+        camera.position.set(8, 3, 12);
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        // Lighting modes
+        let lightingMode = 0;
+        const lightingModes = [
+            { key: 0xffeaa7, fill: 0x87ceeb, rim: 0xaa88ff }, // Warm/Cool/Purple
+            { key: 0xff6b35, fill: 0x4ecdc4, rim: 0xffe66d }, // Orange/Teal/Yellow
+            { key: 0x6c5ce7, fill: 0xfd79a8, rim: 0x00b894 }, // Purple/Pink/Green
+            { key: 0xffffff, fill: 0xffffff, rim: 0xffffff }  // Pure white
+        ];
+
+        // Keyboard controls
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                lightingMode = (lightingMode + 1) % lightingModes.length;
+                const mode = lightingModes[lightingMode];
+                keyLight.color.setHex(mode.key);
+                fillLight.color.setHex(mode.fill);
+                rimLight.color.setHex(mode.rim);
+            }
+        });
+
+        // Animation variables
+        let time = 0;
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.016;
+
+            // Gentle statue rotation
+            statue.rotation.y += 0.002;
+
+            // Animate cosmic particles
+            const positions = cosmicParticles.geometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i + 1] += Math.sin(time + i * 0.01) * 0.01;
+                positions[i] += Math.cos(time + i * 0.005) * 0.005;
+            }
+            cosmicParticles.geometry.attributes.position.needsUpdate = true;
+
+            // Subtle star twinkling
+            const starColors = stars.geometry.attributes.color.array;
+            for (let i = 0; i < starColors.length; i += 3) {
+                if (Math.random() < 0.001) { // Occasional twinkle
+                    const intensity = 0.5 + Math.random() * 0.5;
+                    starColors[i] *= intensity;
+                    starColors[i + 1] *= intensity;
+                    starColors[i + 2] *= intensity;
+                }
+            }
+            stars.geometry.attributes.color.needsUpdate = true;
+
+            // Update controls
+            controls.update();
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        console.log('🗿 Simple Statue in Space');
+        console.log('Classical sculpture floating in cosmic void');
+        console.log('Press Spacebar to cycle lighting modes');
+        console.log('Drag to orbit, scroll to zoom');
+        
+        // Start the scene
+        animate();
+    </script>
+</body>
+</html> 
