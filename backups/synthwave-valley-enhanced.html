@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<!--
+🌌 SYNTHWAVE VALLEY FLYTHROUGH
+=====================================
+
+✨ FEATURES:
+- Linear Valley Flight: Smooth forward movement down a structured mountain valley
+- Valley Wall Mountains: Layered mountain ranges forming natural corridor walls on left and right
+- Horizon Celestial Bodies: Sun and moon positioned on distant horizon ahead in the valley
+- Synthwave Aesthetic: Depth-based opacity fading and emissive materials for retro-futuristic feel
+- Gentle Banking Motion: Subtle side-to-side sway with realistic banking effects
+- Structured Terrain: Organized mountain placement creating clear valley passage
+- Atmospheric Depth: Three-layer particle systems with organic movement
+- Forward-Looking Camera: Always looking ahead down the valley with subtle mouse control
+
+🎮 INTERACTIONS:
+- Mouse movement: Subtle look-around while maintaining forward valley view
+- Scroll wheel: Adjust forward flight speed through the valley
+- Auto-flight: Continuous linear movement down the mountain corridor
+- Banking effects: Realistic aircraft-like banking during turns
+
+🎨 VISUAL EFFECTS:
+- Depth-based mountain opacity: Mountains fade with distance for atmospheric perspective
+- Synthwave color palette: Purple, blue, and pink tones with emissive highlights
+- Parallax mountain movement: Subtle depth effects as you cruise through
+- Horizon-mounted celestials: Sun and moon create dramatic silhouettes ahead
+- Multi-layered particle atmosphere: Dust, spores, and mist with individual behaviors
+- Smooth banking animation: Camera rolls subtly with directional changes
+- Valley corridor lighting: Directional lighting down the mountain passage
+
+🔧 TECHNOLOGY:
+- Structured mountain generation: Left/right valley walls with depth layers
+- Linear flight path mathematics: Forward movement with sinusoidal sway
+- Distance-based material opacity: Automatic atmospheric perspective
+- Horizon positioning system: Celestial bodies placed for optimal valley view
+- Banking rotation calculations: Realistic aircraft-style camera banking
+- Layered terrain architecture: Multiple mountain depth levels for valley structure
+- Synthwave material system: Emissive properties and transparency for retro aesthetic
+
+Created as a synthwave-inspired valley cruise through an alien mountain landscape.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alien Planet Flythrough</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #ff6b35, #4a0e4e);
+            font-family: 'Arial', sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 5px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 5px;
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        Alien Planet Flythrough<br>
+        <small>Flying through mountains • Sunset & Moonrise</small>
+    </div>
+    
+    <div id="controls">
+        Move mouse to look around • Scroll to change speed
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // Enhanced scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            alpha: false,
+            powerPreference: "high-performance"
+        });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(0x1a0a2a);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.autoUpdate = true;
+        renderer.shadowMap.needsUpdate = true;
+        renderer.gammaOutput = true;
+        renderer.gammaFactor = 2.2;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        
+        // Enhanced fog with exponential falloff
+        scene.fog = new THREE.FogExp2(0x2a1a3a, 0.0008);
+        document.body.appendChild(renderer.domElement);
+
+        // Enhanced realistic lighting system
+        const ambientLight = new THREE.AmbientLight(0x404060, 0.15);
+        scene.add(ambientLight);
+
+        // Atmospheric light for general illumination
+        const atmosphericLight = new THREE.HemisphereLight(0x4455bb, 0x2a1a3a, 0.3);
+        scene.add(atmosphericLight);
+
+        // Sun (setting) - enhanced with realistic properties and better shadows
+        const sunLight = new THREE.DirectionalLight(0xff8844, 3.0);
+        sunLight.position.set(-150, 120, -600);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 4096;
+        sunLight.shadow.mapSize.height = 4096;
+        sunLight.shadow.camera.near = 1;
+        sunLight.shadow.camera.far = 1500;
+        sunLight.shadow.camera.left = -800;
+        sunLight.shadow.camera.right = 800;
+        sunLight.shadow.camera.top = 400;
+        sunLight.shadow.camera.bottom = -400;
+        sunLight.shadow.bias = -0.0005;
+        sunLight.shadow.normalBias = 0.1;
+        sunLight.shadow.radius = 4;
+        scene.add(sunLight);
+
+        // Moon (rising) - enhanced with realistic properties
+        const moonLight = new THREE.DirectionalLight(0xb8c6db, 1.2);
+        moonLight.position.set(200, 120, 100);
+        moonLight.castShadow = true;
+        moonLight.shadow.mapSize.width = 2048;
+        moonLight.shadow.mapSize.height = 2048;
+        moonLight.shadow.camera.near = 0.1;
+        moonLight.shadow.camera.far = 600;
+        moonLight.shadow.camera.left = -200;
+        moonLight.shadow.camera.right = 200;
+        moonLight.shadow.camera.top = 200;
+        moonLight.shadow.camera.bottom = -200;
+        moonLight.shadow.bias = -0.0001;
+        scene.add(moonLight);
+
+        // Add fill lights for atmospheric depth
+        const fillLight1 = new THREE.DirectionalLight(0x6644aa, 0.4);
+        fillLight1.position.set(0, 50, 200);
+        scene.add(fillLight1);
+
+        const fillLight2 = new THREE.DirectionalLight(0x4466bb, 0.3);
+        fillLight2.position.set(100, 30, -200);
+        scene.add(fillLight2);
+
+        // Create the Sun sphere - positioned on horizon ahead in valley
+        const sunGeometry = new THREE.SphereGeometry(40, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xff6600,
+            emissive: 0xff4400,
+            emissiveIntensity: 1.5
+        });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        sun.position.set(-150, 80, -600); // Left side of valley horizon
+        scene.add(sun);
+
+        // Add sun glow effect
+        const sunGlowGeometry = new THREE.SphereGeometry(60, 32, 32);
+        const sunGlowMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff8800,
+            transparent: true,
+            opacity: 0.4
+        });
+        const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+        sunGlow.position.copy(sun.position);
+        scene.add(sunGlow);
+
+        // Create the Moon sphere - positioned on opposite side of horizon
+        const moonGeometry = new THREE.SphereGeometry(32, 32, 32);
+        const moonMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xeeeeee,
+            emissive: 0x444466,
+            emissiveIntensity: 0.8
+        });
+        const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+        moon.position.set(180, 100, -500); // Right side of valley horizon
+        scene.add(moon);
+
+        // Add moon glow effect
+        const moonGlowGeometry = new THREE.SphereGeometry(45, 32, 32);
+        const moonGlowMaterial = new THREE.MeshBasicMaterial({
+            color: 0xaaaaff,
+            transparent: true,
+            opacity: 0.3
+        });
+        const moonGlow = new THREE.Mesh(moonGlowGeometry, moonGlowMaterial);
+        moonGlow.position.copy(moon.position);
+        scene.add(moonGlow);
+
+        // Enhanced valley mountain generation with natural detail
+        function createValleyMountains(side, count, depthLayers, heightRange, colorHex) {
+            const mountains = new THREE.Group();
+            const sideMultiplier = side === 'left' ? -1 : 1;
+            
+            for (let layer = 0; layer < depthLayers; layer++) {
+                const layerDistance = 80 + (layer * 120); // Distance from valley center
+                const layerHeight = heightRange.min + (layer * 20); // Taller mountains further back
+                
+                for (let i = 0; i < count; i++) {
+                    const baseRadius = 15 + Math.random() * 25;
+                    const height = layerHeight + Math.random() * (heightRange.max - layerHeight);
+                    
+                    // Create irregular mountain shape instead of perfect cone
+                    const mountainGeometry = new THREE.CylinderGeometry(
+                        baseRadius * (0.1 + Math.random() * 0.3), // Irregular top
+                        baseRadius, // Base radius
+                        height, 
+                        16, // Radial segments
+                        8   // Height segments
+                    );
+                    
+                    // Advanced terrain noise for jagged, realistic mountain shapes
+                    const vertices = mountainGeometry.attributes.position.array;
+                    for (let j = 0; j < vertices.length; j += 3) {
+                        const x = vertices[j];
+                        const z = vertices[j + 2];
+                        const y = vertices[j + 1];
+                        
+                        // Multi-octave noise for realistic terrain
+                        const distance = Math.sqrt(x * x + z * z);
+                        const heightFactor = Math.max(0, y / height);
+                        const radialFactor = distance / baseRadius;
+                        
+                        // Large scale mountain structure
+                        const noise1 = Math.sin(x * 0.08 + i) * Math.cos(z * 0.08 + layer) * 6;
+                        // Medium scale ridges and valleys
+                        const noise2 = Math.sin(x * 0.25) * Math.cos(z * 0.25) * 3;
+                        // Fine surface detail
+                        const noise3 = Math.sin(x * 0.6) * Math.cos(z * 0.6) * 1.5;
+                        // Very fine rock detail
+                        const noise4 = Math.sin(x * 1.2) * Math.cos(z * 1.2) * 0.8;
+                        
+                        const totalNoise = (noise1 + noise2 + noise3 + noise4) * heightFactor * (1 - radialFactor * 0.3);
+                        
+                        // Create jagged peaks by amplifying noise at higher elevations
+                        const jaggedFactor = heightFactor * heightFactor * 2;
+                        
+                        vertices[j] += totalNoise * 0.4 + (Math.random() - 0.5) * jaggedFactor;
+                        vertices[j + 2] += totalNoise * 0.4 + (Math.random() - 0.5) * jaggedFactor;
+                        if (y > 0) {
+                            vertices[j + 1] += totalNoise * 0.6 + (Math.random() - 0.5) * jaggedFactor * 0.5;
+                        }
+                    }
+                    mountainGeometry.attributes.position.needsUpdate = true;
+                    mountainGeometry.computeVertexNormals();
+                    
+                    // Realistic natural rock materials
+                    const opacity = 0.95 - (layer * 0.1); // Subtle distance fading
+                    
+                    // Natural rock color variations
+                    const baseColor = new THREE.Color(colorHex);
+                    const rockVariation = Math.random() * 0.3 - 0.15;
+                    baseColor.offsetHSL(rockVariation * 0.1, rockVariation * 0.2, rockVariation * 0.1);
+                    
+                    const mountainMaterial = new THREE.MeshStandardMaterial({ 
+                        color: baseColor,
+                        roughness: 0.8 + Math.random() * 0.15, // Natural rock roughness
+                        metalness: 0.05 + Math.random() * 0.1, // Slight mineral content
+                        transparent: layer > 0,
+                        opacity: opacity,
+                        flatShading: false,
+                        // Add subtle ambient occlusion effect
+                        aoMapIntensity: 0.3
+                    });
+                    
+                    const mountain = new THREE.Mesh(mountainGeometry, mountainMaterial);
+                    
+                    // Position along valley walls
+                    const zPosition = (i - count/2) * 60 + (Math.random() - 0.5) * 30;
+                    mountain.position.x = layerDistance * sideMultiplier + (Math.random() - 0.5) * 40;
+                    mountain.position.z = zPosition;
+                    mountain.position.y = -20 + Math.random() * 10;
+                    
+                    // Slight rotation for natural look
+                    mountain.rotation.y = Math.random() * Math.PI * 2;
+                    mountain.rotation.z = (Math.random() - 0.5) * 0.15;
+                    
+                    mountain.castShadow = true;
+                    mountain.receiveShadow = true;
+                    
+                    mountains.add(mountain);
+                }
+            }
+            
+            return mountains;
+        }
+
+        // Create distant horizon mountains
+        function createHorizonMountains(count, distance, heightRange, colorHex) {
+            const mountains = new THREE.Group();
+            
+            for (let i = 0; i < count; i++) {
+                const baseRadius = 20 + Math.random() * 40;
+                const height = heightRange.min + Math.random() * (heightRange.max - heightRange.min);
+                
+                const mountainGeometry = new THREE.ConeGeometry(baseRadius, height, 8);
+                const mountainMaterial = new THREE.MeshPhongMaterial({ 
+                    color: colorHex,
+                    emissive: new THREE.Color(colorHex).multiplyScalar(0.03),
+                    transparent: true,
+                    opacity: 0.4,
+                    flatShading: true
+                });
+                
+                const mountain = new THREE.Mesh(mountainGeometry, mountainMaterial);
+                
+                // Spread across distant horizon
+                const angle = (i / count) * Math.PI * 2;
+                mountain.position.x = Math.cos(angle) * distance;
+                mountain.position.z = Math.sin(angle) * distance;
+                mountain.position.y = -30 + Math.random() * 20;
+                
+                mountain.rotation.y = Math.random() * Math.PI * 2;
+                
+                mountains.add(mountain);
+            }
+            
+            return mountains;
+        }
+
+        // Create valley structure - mountains on left and right sides
+        const leftValleyWall = createValleyMountains('left', 15, 3, {min: 60, max: 120}, 0x6a4a6a);
+        const rightValleyWall = createValleyMountains('right', 15, 3, {min: 60, max: 120}, 0x4a6a6a);
+        
+        // Create distant horizon mountains for atmosphere
+        const horizonMountains = createHorizonMountains(20, 800, {min: 150, max: 300}, 0x2a2a4a);
+
+        scene.add(leftValleyWall);
+        scene.add(rightValleyWall);
+        scene.add(horizonMountains);
+
+        // Create realistic terrain with hills and valleys
+        const groundGeometry = new THREE.PlaneGeometry(3000, 3000, 128, 128);
+        const groundVertices = groundGeometry.attributes.position.array;
+        
+        // Generate realistic terrain heightmap
+        for (let i = 0; i < groundVertices.length; i += 3) {
+            const x = groundVertices[i];
+            const z = groundVertices[i + 2];
+            
+            // Large scale terrain features
+            const terrain1 = Math.sin(x * 0.003) * Math.cos(z * 0.003) * 15;
+            // Medium scale hills
+            const terrain2 = Math.sin(x * 0.008) * Math.cos(z * 0.008) * 8;
+            // Small scale variation
+            const terrain3 = Math.sin(x * 0.02) * Math.cos(z * 0.02) * 3;
+            // Fine surface detail
+            const terrain4 = Math.sin(x * 0.05) * Math.cos(z * 0.05) * 1;
+            
+            // Valley effect - lower in the center
+            const distanceFromCenter = Math.sqrt(x * x + z * z);
+            const valleyDepth = Math.max(0, (distanceFromCenter - 200) * 0.02);
+            
+            const totalHeight = terrain1 + terrain2 + terrain3 + terrain4 - valleyDepth - 25;
+            groundVertices[i + 1] = totalHeight;
+        }
+        groundGeometry.attributes.position.needsUpdate = true;
+        groundGeometry.computeVertexNormals();
+        
+        // Realistic ground material
+        const groundMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4a3c28,
+            roughness: 0.9,
+            metalness: 0.1,
+            transparent: false
+        });
+        
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        ground.castShadow = false;
+        scene.add(ground);
+
+        // Create realistic sky dome with gradient
+        const createSkyDome = () => {
+            const skyGeometry = new THREE.SphereGeometry(1500, 32, 32);
+            
+            // Create sky gradient material
+            const skyMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    topColor: { value: new THREE.Color(0x0077ff) },
+                    bottomColor: { value: new THREE.Color(0x89cff0) },
+                    offset: { value: 33 },
+                    exponent: { value: 0.6 }
+                },
+                vertexShader: `
+                    varying vec3 vWorldPosition;
+                    void main() {
+                        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                        vWorldPosition = worldPosition.xyz;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 topColor;
+                    uniform vec3 bottomColor;
+                    uniform float offset;
+                    uniform float exponent;
+                    varying vec3 vWorldPosition;
+                    void main() {
+                        float h = normalize(vWorldPosition + offset).y;
+                        gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+                    }
+                `,
+                side: THREE.BackSide
+            });
+            
+            const skyDome = new THREE.Mesh(skyGeometry, skyMaterial);
+            return skyDome;
+        };
+
+        const skyDome = createSkyDome();
+        scene.add(skyDome);
+
+        // Add atmospheric layers - distant haze
+        const createAtmosphericLayer = (radius, height, color, opacity) => {
+            const geometry = new THREE.CylinderGeometry(radius, radius, height, 32, 1, true);
+            const material = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: opacity,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            const layer = new THREE.Mesh(geometry, material);
+            layer.position.y = height / 2;
+            return layer;
+        };
+
+        const hazeLayer1 = createAtmosphericLayer(600, 120, 0x88aaff, 0.08);
+        const hazeLayer2 = createAtmosphericLayer(800, 180, 0x66bbff, 0.06);
+        const hazeLayer3 = createAtmosphericLayer(1000, 240, 0x44ccff, 0.04);
+        
+        scene.add(hazeLayer1);
+        scene.add(hazeLayer2);
+        scene.add(hazeLayer3);
+
+                // Enhanced atmospheric particle system
+        const createParticleSystem = (count, sizeRange, opacityRange, colorPalette, distribution) => {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+            const sizes = new Float32Array(count);
+            const velocities = new Float32Array(count * 3);
+
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 3;
+                
+                // Position based on distribution type
+                if (distribution === 'atmospheric') {
+                    positions[i3] = (Math.random() - 0.5) * 800;
+                    positions[i3 + 1] = Math.random() * 150 - 30;
+                    positions[i3 + 2] = (Math.random() - 0.5) * 800;
+                } else if (distribution === 'dust') {
+                    positions[i3] = (Math.random() - 0.5) * 600;
+                    positions[i3 + 1] = Math.random() * 100 - 20;
+                    positions[i3 + 2] = (Math.random() - 0.5) * 600;
+                }
+                
+                // Random velocities for organic movement
+                velocities[i3] = (Math.random() - 0.5) * 0.02;
+                velocities[i3 + 1] = (Math.random() - 0.5) * 0.01;
+                velocities[i3 + 2] = (Math.random() - 0.5) * 0.02;
+                
+                // Variable sizes
+                sizes[i] = sizeRange.min + Math.random() * (sizeRange.max - sizeRange.min);
+                
+                // Color selection from palette
+                const colorIndex = Math.floor(Math.random() * colorPalette.length);
+                const color = colorPalette[colorIndex];
+                colors[i3] = color.r;
+                colors[i3 + 1] = color.g;
+                colors[i3 + 2] = color.b;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+            const material = new THREE.PointsMaterial({
+                size: 1,
+                vertexColors: true,
+                transparent: true,
+                opacity: opacityRange.base,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+
+            const system = new THREE.Points(geometry, material);
+            system.userData = { velocities, opacityRange };
+            return system;
+        };
+
+        // Create multiple particle systems for layered atmosphere
+        const dustParticles = createParticleSystem(1500, {min: 1, max: 3}, {base: 0.4, variation: 0.3}, [
+            {r: 1.0, g: 0.8, b: 0.4}, // Warm dust
+            {r: 0.9, g: 0.7, b: 0.5}, // Golden dust
+            {r: 0.8, g: 0.6, b: 0.3}  // Amber dust
+        ], 'dust');
+
+        const sporeParticles = createParticleSystem(800, {min: 2, max: 5}, {base: 0.5, variation: 0.4}, [
+            {r: 0.7, g: 0.3, b: 0.9}, // Purple spores
+            {r: 0.6, g: 0.4, b: 0.8}, // Violet spores
+            {r: 0.8, g: 0.2, b: 0.7}  // Magenta spores
+        ], 'atmospheric');
+
+        const mistParticles = createParticleSystem(1000, {min: 3, max: 8}, {base: 0.2, variation: 0.3}, [
+            {r: 0.3, g: 0.6, b: 1.0}, // Blue mist
+            {r: 0.4, g: 0.7, b: 0.9}, // Cyan mist
+            {r: 0.2, g: 0.5, b: 0.8}  // Deep blue mist
+        ], 'atmospheric');
+
+        scene.add(dustParticles);
+        scene.add(sporeParticles);
+        scene.add(mistParticles);
+
+        // Store references for animation
+        const allParticleSystems = [dustParticles, sporeParticles, mistParticles];
+
+         // Set initial camera position for valley flythrough
+         camera.position.set(0, 25, 200);
+         camera.lookAt(0, 20, 0);
+
+         // Valley flight path variables
+         let flightTime = 0;
+         let flightSpeed = 1;
+         const valleyWidth = 160; // Width of the valley
+         const flightHeight = 25;
+         const flightSpeed_base = 2; // Base forward speed
+
+        // Mouse interaction
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Scroll for speed control
+        document.addEventListener('wheel', (event) => {
+            flightSpeed += event.deltaY * 0.001;
+            flightSpeed = Math.max(0.2, Math.min(3, flightSpeed)); // Clamp speed
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            flightTime += 0.01 * flightSpeed;
+
+            // Linear valley flythrough with gentle sway
+            const forwardSpeed = flightSpeed_base * flightSpeed;
+            const zPosition = flightTime * forwardSpeed * 10;
+            
+            // Gentle side-to-side sway through the valley
+            const sway = Math.sin(flightTime * 0.4) * 15;
+            camera.position.x = sway + mouseX * 30;
+            camera.position.z = zPosition;
+            camera.position.y = flightHeight + Math.sin(flightTime * 0.3) * 8 + mouseY * 20;
+
+            // Look ahead down the valley with slight banking
+            const lookAheadDistance = 100;
+            const lookX = sway * 0.5 + mouseX * 40;
+            const lookZ = zPosition - lookAheadDistance;
+            const lookY = flightHeight - 5 + mouseY * 25;
+            camera.lookAt(lookX, lookY, lookZ);
+            
+            // Add subtle banking effect based on sway
+            const bankAngle = Math.sin(flightTime * 0.4) * 0.05;
+            camera.rotation.z = bankAngle;
+
+            // Subtle celestial movement - sun setting, moon rising
+            sun.position.y = 80 - Math.sin(flightTime * 0.1) * 20;
+            sunLight.position.copy(sun.position);
+            sunGlow.position.copy(sun.position);
+
+            moon.position.y = 100 + Math.sin(flightTime * 0.08) * 15;
+            moonLight.position.copy(moon.position);
+            moonGlow.position.copy(moon.position);
+
+            // Subtle mountain movement for depth parallax
+            leftValleyWall.position.z = Math.sin(flightTime * 0.02) * 5;
+            rightValleyWall.position.z = Math.cos(flightTime * 0.025) * 3;
+            horizonMountains.rotation.y += 0.0002;
+
+            // Animate enhanced particle systems
+            allParticleSystems.forEach((system, systemIndex) => {
+                const positions = system.geometry.attributes.position.array;
+                const velocities = system.userData.velocities;
+                const opacityRange = system.userData.opacityRange;
+                
+                for (let i = 0; i < positions.length; i += 3) {
+                    // Apply organic movement with individual velocities
+                    positions[i] += velocities[i] + Math.sin(flightTime * 0.3 + i * 0.1) * 0.02;
+                    positions[i + 1] += velocities[i + 1] + Math.sin(flightTime * 0.2 + i * 0.05) * 0.03;
+                    positions[i + 2] += velocities[i + 2] + Math.cos(flightTime * 0.4 + i * 0.08) * 0.02;
+                    
+                    // Boundary wrapping for continuous effect
+                    if (positions[i] > 400) positions[i] = -400;
+                    if (positions[i] < -400) positions[i] = 400;
+                    if (positions[i + 1] > 200) positions[i + 1] = -50;
+                    if (positions[i + 1] < -100) positions[i + 1] = 200;
+                    if (positions[i + 2] > 400) positions[i + 2] = -400;
+                    if (positions[i + 2] < -400) positions[i + 2] = 400;
+                }
+                
+                // Animate opacity for breathing effect
+                const opacityVariation = Math.sin(flightTime * 0.5 + systemIndex) * opacityRange.variation;
+                system.material.opacity = opacityRange.base + opacityVariation;
+                
+                system.geometry.attributes.position.needsUpdate = true;
+            });
+
+            // Dynamic sky colors based on time
+            const skyColor = new THREE.Color();
+            const timeOfDay = (Math.sin(flightTime * 0.1) + 1) * 0.5; // 0 to 1
+            skyColor.setHSL(0.8 - timeOfDay * 0.3, 0.8, 0.3 + timeOfDay * 0.3);
+            renderer.setClearColor(skyColor);
+
+            // Update fog color to match sky
+            scene.fog.color.copy(skyColor);
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Debug: Log when rendering starts
+        console.log('🚀 Starting synthwave valley flythrough...');
+        console.log('Valley walls created:', leftValleyWall.children.length + rightValleyWall.children.length);
+        console.log('Horizon mountains:', horizonMountains.children.length);
+        console.log('Particle systems created:', allParticleSystems.length);
+        console.log('Total particles:', allParticleSystems.reduce((sum, sys) => sum + sys.geometry.attributes.position.count, 0));
+        console.log('Sun position:', sun.position);
+        console.log('Moon position:', moon.position);
+        console.log('Camera position:', camera.position);
+        
+        // Add a simple loading indicator that disappears after 3 seconds
+        const loadingDiv = document.createElement('div');
+        loadingDiv.innerHTML = '🌌 Rendering alien planet...';
+        loadingDiv.style.cssText = `
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            color: white; 
+            font-size: 24px; 
+            z-index: 9999;
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+        `;
+        document.body.appendChild(loadingDiv);
+        
+        setTimeout(() => {
+            if (loadingDiv.parentNode) {
+                loadingDiv.parentNode.removeChild(loadingDiv);
+            }
+            console.log('✅ Alien planet should be fully rendered now');
+        }, 3000);
+
+        // Start the journey
+        animate();
+    </script>
+</body>
+</html> 

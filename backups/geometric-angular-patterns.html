@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trippy Geometric Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: black;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        
+        if (!gl) {
+            alert('WebGL is not supported');
+        }
+        
+        // Vertex shader - simple quad
+        const vertexShaderSource = `
+            attribute vec2 a_position;
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+        `;
+        
+        // Fragment shader - the magic happens here
+        const fragmentShaderSource = `
+            precision mediump float;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+            
+            vec3 hsv2rgb(vec3 c) {
+                vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+                vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+                return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+            }
+            
+            // Simple noise function
+            float noise(vec2 p) {
+                return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+            }
+            
+            float smoothNoise(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                f = f * f * (3.0 - 2.0 * f);
+                
+                float a = noise(i);
+                float b = noise(i + vec2(1.0, 0.0));
+                float c = noise(i + vec2(0.0, 1.0));
+                float d = noise(i + vec2(1.0, 1.0));
+                
+                return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+            }
+            
+            // Mathematical constants
+            const float PI = 3.14159265359;
+            const float PHI = 1.618033988749; // Golden ratio
+            const float E = 2.718281828459;
+            
+            float geometricPattern(vec2 uv, float time) {
+                // Active time progression
+                float t = time * 0.6;
+                
+                // Transform to grid coordinates
+                vec2 gridUV = uv * 8.0;
+                
+                // Simplified square subdivisions (reduced complexity)
+                float squares = 0.0;
+                
+                // Level 0
+                vec2 scaledUV0 = gridUV;
+                vec2 offset0 = vec2(sin(t * 0.3), cos(t * 0.4)) * 0.5;
+                scaledUV0 += offset0;
+                vec2 cellID0 = floor(scaledUV0);
+                vec2 cellUV0 = fract(scaledUV0);
+                vec2 squareDist0 = abs(cellUV0 - 0.5);
+                float squareSize0 = 0.3 + 0.2 * sin(t + cellID0.x + cellID0.y);
+                float square0 = 1.0 - step(squareSize0, max(squareDist0.x, squareDist0.y));
+                squares += square0;
+                
+                // Level 1
+                vec2 scaledUV1 = gridUV * 2.0;
+                vec2 offset1 = vec2(sin(t * 0.3 + 1.0), cos(t * 0.4 + 1.0)) * 0.5;
+                scaledUV1 += offset1;
+                vec2 cellID1 = floor(scaledUV1);
+                vec2 cellUV1 = fract(scaledUV1);
+                vec2 squareDist1 = abs(cellUV1 - 0.5);
+                float squareSize1 = 0.3 + 0.2 * sin(t + cellID1.x + cellID1.y);
+                float square1 = 1.0 - step(squareSize1, max(squareDist1.x, squareDist1.y));
+                squares += square1 * 0.5;
+                
+                // Tessellation patterns
+                vec2 tessUV = uv * 6.0 + vec2(sin(t * 0.2), cos(t * 0.15));
+                vec2 tessID = floor(tessUV);
+                vec2 tessFrac = fract(tessUV);
+                
+                // Islamic-style geometric pattern
+                float islamic = 0.0;
+                // Create star pattern
+                float starAngle = atan(tessFrac.y - 0.5, tessFrac.x - 0.5);
+                float starRadius = length(tessFrac - 0.5);
+                float star = sin(starAngle * 8.0 + t) * 0.3 + 0.7;
+                islamic += step(starRadius, star * 0.4);
+                
+                // Grid lines with right angles
+                vec2 gridLines = abs(fract(gridUV + t * 0.1) - 0.5);
+                float horizontalLines = 1.0 - step(0.05, gridLines.y);
+                float verticalLines = 1.0 - step(0.05, gridLines.x);
+                float grid = max(horizontalLines, verticalLines);
+                
+                // Simplified rectangular patterns
+                float rectangles = 0.0;
+                
+                // Rectangle layer 1
+                vec2 rectUV1 = uv * 3.0 + vec2(sin(t * 0.3), cos(t * 0.25));
+                vec2 rectFrac1 = fract(rectUV1);
+                vec2 rectBorder1 = abs(rectFrac1 - 0.5);
+                float rectThickness1 = 0.1 + 0.05 * sin(t);
+                float outerRect1 = step(0.5 - rectThickness1, max(rectBorder1.x, rectBorder1.y));
+                float innerRect1 = step(0.5 - rectThickness1 * 2.0, max(rectBorder1.x, rectBorder1.y));
+                rectangles += (outerRect1 - innerRect1);
+                
+                // Rectangle layer 2
+                vec2 rectUV2 = uv * 5.0 + vec2(sin(t * 0.3 + 1.0), cos(t * 0.25 + 1.0));
+                vec2 rectFrac2 = fract(rectUV2);
+                vec2 rectBorder2 = abs(rectFrac2 - 0.5);
+                float rectThickness2 = 0.1 + 0.05 * sin(t + 1.0);
+                float outerRect2 = step(0.5 - rectThickness2, max(rectBorder2.x, rectBorder2.y));
+                float innerRect2 = step(0.5 - rectThickness2 * 2.0, max(rectBorder2.x, rectBorder2.y));
+                rectangles += (outerRect2 - innerRect2) * 0.8;
+                
+                // Simplified fractal branches (4 main directions)
+                float fractals = 0.0;
+                vec2 fractalUV = uv * 4.0;
+                
+                // Horizontal branch
+                float branchDist0 = abs(fractalUV.y);
+                float branchWidth0 = 0.1 + 0.05 * sin(t);
+                float branchLength0 = 2.0 + sin(t * 0.2);
+                float branch0 = (1.0 - step(branchWidth0, branchDist0)) * step(abs(fractalUV.x), branchLength0);
+                fractals += branch0 * 0.25;
+                
+                // Vertical branch
+                float branchDist1 = abs(fractalUV.x);
+                float branchWidth1 = 0.1 + 0.05 * sin(t + 1.0);
+                float branchLength1 = 2.0 + sin(t * 0.2 + 1.0);
+                float branch1 = (1.0 - step(branchWidth1, branchDist1)) * step(abs(fractalUV.y), branchLength1);
+                fractals += branch1 * 0.25;
+                
+                // Diagonal branches
+                vec2 diag = abs(fractalUV);
+                float diagDist = abs(diag.x - diag.y);
+                float diagWidth = 0.15 + 0.05 * sin(t + 2.0);
+                fractals += (1.0 - step(diagWidth, diagDist)) * 0.5;
+                
+                // Combine all geometric patterns
+                float pattern = squares * 0.3 + 
+                               islamic * 0.2 + 
+                               grid * 0.15 +
+                               rectangles * 0.25 +
+                               fractals * 0.1;
+                
+                return clamp(pattern, 0.0, 1.0);
+            }
+            
+            // Calculate normal for geometric surface lighting
+            vec3 calculateNormal(vec2 uv, float time) {
+                float eps = 0.01;
+                float center = geometricPattern(uv, time);
+                float right = geometricPattern(uv + vec2(eps, 0.0), time);
+                float up = geometricPattern(uv + vec2(0.0, eps), time);
+                
+                vec3 normal = normalize(vec3(center - right, center - up, eps * 2.0));
+                return normal;
+            }
+            
+            void main() {
+                vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+                
+                // Active zoom effect
+                float zoom = sin(u_time * 0.3) * 0.5 + 1.0;
+                uv *= zoom;
+                
+                // Active rotation
+                float rotation = u_time * 0.4;
+                float cos_r = cos(rotation);
+                float sin_r = sin(rotation);
+                uv = vec2(uv.x * cos_r - uv.y * sin_r, uv.x * sin_r + uv.y * cos_r);
+                
+                // Get geometric pattern
+                float geoValue = geometricPattern(uv, u_time);
+                
+                // Calculate geometric surface lighting
+                vec3 normal = calculateNormal(uv, u_time);
+                
+                // Light direction (mathematical elegance lighting)
+                vec3 lightDir = normalize(vec3(0.4, 0.6, 1.0));
+                
+                // Calculate diffuse lighting
+                float diffuse = max(0.0, dot(normal, lightDir));
+                
+                // Calculate specular lighting (mathematical surface reflections)
+                vec3 viewDir = vec3(0.0, 0.0, 1.0);
+                vec3 reflectDir = reflect(-lightDir, normal);
+                float specular = pow(max(0.0, dot(viewDir, reflectDir)), 48.0);
+                
+                // Contemplative ambient lighting
+                float ambient = 0.3;
+                
+                // Combine lighting
+                float lighting = ambient + diffuse * 0.6 + specular * 0.8;
+                
+                // Apply lighting to geometric surface
+                float finalIntensity = geoValue * lighting;
+                
+                // Dynamic mathematical colors that change over time
+                float colorTime = u_time * 0.2;
+                
+                // Create multiple color palettes that cycle
+                vec3 palette1 = vec3(0.8, 0.2, 0.4);       // Vibrant magenta
+                vec3 palette2 = vec3(0.2, 0.8, 0.3);       // Bright green
+                vec3 palette3 = vec3(0.9, 0.6, 0.1);       // Orange/yellow
+                vec3 palette4 = vec3(0.1, 0.4, 0.9);       // Electric blue
+                vec3 palette5 = vec3(0.7, 0.1, 0.8);       // Purple
+                
+                // Cycle through palettes based on time
+                float paletteIndex = mod(colorTime, 5.0);
+                vec3 currentPalette;
+                if(paletteIndex < 1.0) {
+                    currentPalette = mix(palette1, palette2, fract(paletteIndex));
+                } else if(paletteIndex < 2.0) {
+                    currentPalette = mix(palette2, palette3, fract(paletteIndex));
+                } else if(paletteIndex < 3.0) {
+                    currentPalette = mix(palette3, palette4, fract(paletteIndex));
+                } else if(paletteIndex < 4.0) {
+                    currentPalette = mix(palette4, palette5, fract(paletteIndex));
+                } else {
+                    currentPalette = mix(palette5, palette1, fract(paletteIndex));
+                }
+                
+                // Create complementary colors
+                vec3 complementary = vec3(1.0) - currentPalette;
+                vec3 accent = mix(currentPalette, complementary, 0.7);
+                
+                // Mix colors based on mathematical intensity and patterns
+                vec3 mathColor = mix(currentPalette * 0.3, currentPalette, finalIntensity);
+                mathColor = mix(mathColor, accent, finalIntensity * finalIntensity);
+                mathColor = mix(mathColor, complementary, specular * 0.4);
+                
+                vec3 color = mathColor * finalIntensity;
+                
+                // Add colorful glow that changes with time
+                float glow = 1.0 / (1.0 + length(uv) * 1.5);
+                color += currentPalette * glow * 0.3;
+                
+                // Enhanced brightness for active visualization
+                color *= 1.6;
+                
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+        
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            
+            return shader;
+        }
+        
+        function createProgram(gl, vertexShader, fragmentShader) {
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error('Program linking error:', gl.getProgramInfoLog(program));
+                gl.deleteProgram(program);
+                return null;
+            }
+            
+            return program;
+        }
+        
+        // Create shaders and program
+        const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+        const program = createProgram(gl, vertexShader, fragmentShader);
+        
+        // Set up geometry (full-screen quad)
+        const positions = new Float32Array([
+            -1, -1,
+             1, -1,
+            -1,  1,
+             1,  1,
+        ]);
+        
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+        
+        // Get uniform locations
+        const timeLocation = gl.getUniformLocation(program, 'u_time');
+        const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+        
+        // Get attribute location
+        const positionLocation = gl.getAttribLocation(program, 'a_position');
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+        
+        function render(time) {
+            time *= 0.001; // Convert to seconds
+            
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            
+            gl.useProgram(program);
+            
+            // Set uniforms
+            gl.uniform1f(timeLocation, time);
+            gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+            
+            // Set up attributes
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.enableVertexAttribArray(positionLocation);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+            
+            // Draw
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            
+            requestAnimationFrame(render);
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', resize);
+        resize();
+        
+        // Start the animation
+        requestAnimationFrame(render);
+    </script>
+</body>
+</html> 

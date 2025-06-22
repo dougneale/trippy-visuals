@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<!--
+🌌 ALIEN PLANET FLYTHROUGH
+=====================================
+
+✨ FEATURES:
+- Cinematic Flight Path: Smooth camera movement flying through alien mountain ranges
+- Procedural Mountain Terrain: Multiple layers of jagged peaks with varying heights and colors
+- Dual Celestial Event: Massive sunset and moonrise happening simultaneously
+- Alien Atmosphere: Purple/pink sky gradients with otherworldly colors
+- Dynamic Lighting: Sun and moon both casting realistic shadows and illumination
+- Particle Effects: Atmospheric dust, floating spores, and alien particles
+- Depth Layers: Multiple mountain ranges creating parallax depth effect
+- Color Evolution: Sky colors shift from day to night as you fly through
+- Smooth Animation: Endless flight path with seamless looping
+
+🎮 INTERACTIONS:
+- Mouse movement: Subtle camera sway and look-around while flying
+- Scroll wheel: Adjust flight speed (faster/slower through the landscape)
+- Auto-flight: Camera follows predetermined cinematic path through mountains
+- Real-time rendering: Experience changes as celestial bodies move
+
+🎨 VISUAL EFFECTS:
+- Volumetric atmosphere with haze and depth fog
+- Realistic mountain silhouettes against alien sky
+- Dual lighting system from sun and moon
+- Gradient sky transitions from orange sunset to purple moonrise
+- Particle systems for atmospheric effects
+- Shadow casting from mountain peaks
+- Ambient lighting shifts throughout the journey
+
+🔧 TECHNOLOGY:
+- Three.js r128 for 3D rendering and terrain generation
+- Procedural geometry for infinite mountain landscapes
+- Advanced lighting with multiple light sources
+- Custom gradient materials for alien atmosphere
+- BufferGeometry for efficient terrain rendering
+- Smooth camera interpolation for cinematic movement
+
+Created as an immersive alien world exploration experience.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alien Planet Flythrough</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #ff6b35, #4a0e4e);
+            font-family: 'Arial', sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 5px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 5px;
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        Alien Planet Flythrough<br>
+        <small>Flying through mountains • Sunset & Moonrise</small>
+    </div>
+    
+    <div id="controls">
+        Move mouse to look around • Scroll to change speed
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x2a0a2e);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        scene.fog = new THREE.Fog(0x2a0a2e, 300, 800);
+        document.body.appendChild(renderer.domElement);
+
+        // Lighting setup - Sun and Moon
+        const ambientLight = new THREE.AmbientLight(0x202020, 0.1);
+        scene.add(ambientLight);
+
+        // Sun (setting)
+        const sunLight = new THREE.DirectionalLight(0xff6b35, 1.5);
+        sunLight.position.set(-200, 50, -100);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.1;
+        sunLight.shadow.camera.far = 500;
+        sunLight.shadow.camera.left = -200;
+        sunLight.shadow.camera.right = 200;
+        sunLight.shadow.camera.top = 200;
+        sunLight.shadow.camera.bottom = -200;
+        scene.add(sunLight);
+
+        // Moon (rising)
+        const moonLight = new THREE.DirectionalLight(0xb8c6db, 0.8);
+        moonLight.position.set(200, 80, 100);
+        moonLight.castShadow = true;
+        moonLight.shadow.mapSize.width = 1024;
+        moonLight.shadow.mapSize.height = 1024;
+        scene.add(moonLight);
+
+        // Create the Sun sphere - bigger and more visible
+        const sunGeometry = new THREE.SphereGeometry(30, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xff6600,
+            emissive: 0xff4400,
+            emissiveIntensity: 1.2
+        });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        sun.position.set(-200, 120, -80);
+        scene.add(sun);
+
+        // Add sun glow effect
+        const sunGlowGeometry = new THREE.SphereGeometry(45, 32, 32);
+        const sunGlowMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff8800,
+            transparent: true,
+            opacity: 0.3
+        });
+        const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+        sunGlow.position.copy(sun.position);
+        scene.add(sunGlow);
+
+        // Create the Moon sphere - bigger and more visible
+        const moonGeometry = new THREE.SphereGeometry(25, 32, 32);
+        const moonMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xeeeeee,
+            emissive: 0x444466,
+            emissiveIntensity: 0.6
+        });
+        const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+        moon.position.set(200, 140, 80);
+        scene.add(moon);
+
+        // Add moon glow effect
+        const moonGlowGeometry = new THREE.SphereGeometry(35, 32, 32);
+        const moonGlowMaterial = new THREE.MeshBasicMaterial({
+            color: 0xaaaaff,
+            transparent: true,
+            opacity: 0.2
+        });
+        const moonGlow = new THREE.Mesh(moonGlowGeometry, moonGlowMaterial);
+        moonGlow.position.copy(moon.position);
+        scene.add(moonGlow);
+
+        // Mountain generation function
+        function createMountainRange(count, baseDistance, heightRange, colorHex) {
+            const mountains = new THREE.Group();
+            
+            for (let i = 0; i < count; i++) {
+                const mountainGeometry = new THREE.ConeGeometry(
+                    10 + Math.random() * 20, // base radius
+                    heightRange.min + Math.random() * (heightRange.max - heightRange.min), // height
+                    8 + Math.floor(Math.random() * 8) // segments
+                );
+                
+                const mountainMaterial = new THREE.MeshLambertMaterial({ 
+                    color: colorHex,
+                    emissive: new THREE.Color(colorHex).multiplyScalar(0.1),
+                    transparent: true,
+                    opacity: 0.8 + Math.random() * 0.2
+                });
+                
+                const mountain = new THREE.Mesh(mountainGeometry, mountainMaterial);
+                
+                // Position mountains
+                const angle = (i / count) * Math.PI * 4; // Multiple rings
+                const distance = baseDistance + (Math.random() - 0.5) * 100;
+                mountain.position.x = Math.cos(angle) * distance;
+                mountain.position.z = Math.sin(angle) * distance;
+                mountain.position.y = -20 + Math.random() * 10;
+                
+                // Random rotation
+                mountain.rotation.y = Math.random() * Math.PI * 2;
+                
+                // Enable shadows
+                mountain.castShadow = true;
+                mountain.receiveShadow = true;
+                
+                mountains.add(mountain);
+            }
+            
+            return mountains;
+        }
+
+        // Create multiple mountain layers for depth
+        const nearMountains = createMountainRange(30, 100, {min: 40, max: 80}, 0x4a4a4a);
+        const midMountains = createMountainRange(40, 200, {min: 60, max: 120}, 0x3a3a3a);
+        const farMountains = createMountainRange(50, 350, {min: 80, max: 160}, 0x2a2a2a);
+        const distantMountains = createMountainRange(30, 500, {min: 100, max: 200}, 0x1a1a1a);
+
+        scene.add(nearMountains);
+        scene.add(midMountains);
+        scene.add(farMountains);
+        scene.add(distantMountains);
+
+        // Create atmospheric particles
+        const particleGeometry = new THREE.BufferGeometry();
+        const particleCount = 2000;
+        const particlePositions = new Float32Array(particleCount * 3);
+        const particleColors = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            // Spread particles around the flight path
+            particlePositions[i] = (Math.random() - 0.5) * 1000;
+            particlePositions[i + 1] = Math.random() * 200 - 50;
+            particlePositions[i + 2] = (Math.random() - 0.5) * 1000;
+            
+            // Alien particle colors
+            const colorChoice = Math.random();
+            if (colorChoice < 0.3) {
+                // Orange dust
+                particleColors[i] = 1.0;
+                particleColors[i + 1] = 0.6;
+                particleColors[i + 2] = 0.2;
+            } else if (colorChoice < 0.6) {
+                // Purple spores
+                particleColors[i] = 0.8;
+                particleColors[i + 1] = 0.4;
+                particleColors[i + 2] = 0.9;
+            } else {
+                // Blue mist
+                particleColors[i] = 0.4;
+                particleColors[i + 1] = 0.7;
+                particleColors[i + 2] = 1.0;
+            }
+        }
+
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 2,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+
+                 const particles = new THREE.Points(particleGeometry, particleMaterial);
+         scene.add(particles);
+
+         // Set initial camera position
+         camera.position.set(0, 30, 100);
+         camera.lookAt(0, 0, 0);
+
+         // Flight path variables
+         let flightTime = 0;
+         let flightSpeed = 1;
+         const flightRadius = 150;
+         const flightHeight = 30;
+
+        // Mouse interaction
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Scroll for speed control
+        document.addEventListener('wheel', (event) => {
+            flightSpeed += event.deltaY * 0.001;
+            flightSpeed = Math.max(0.2, Math.min(3, flightSpeed)); // Clamp speed
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            flightTime += 0.01 * flightSpeed;
+
+            // Camera flight path
+            camera.position.x = Math.cos(flightTime * 0.3) * flightRadius;
+            camera.position.z = Math.sin(flightTime * 0.3) * flightRadius;
+            camera.position.y = flightHeight + Math.sin(flightTime * 0.7) * 20;
+
+            // Camera look direction with mouse influence
+            const lookX = Math.cos(flightTime * 0.3 + 0.5) * flightRadius + mouseX * 50;
+            const lookZ = Math.sin(flightTime * 0.3 + 0.5) * flightRadius;
+            const lookY = flightHeight + mouseY * 30;
+            camera.lookAt(lookX, lookY, lookZ);
+
+            // Animate sun (setting)
+            sun.position.y = 100 - flightTime * 5;
+            sun.position.x = -400 + flightTime * 2;
+            sunLight.position.copy(sun.position);
+            sunGlow.position.copy(sun.position);
+
+            // Animate moon (rising)
+            moon.position.y = 50 + flightTime * 3;
+            moon.position.x = 400 - flightTime * 1.5;
+            moonLight.position.copy(moon.position);
+            moonGlow.position.copy(moon.position);
+
+            // Rotate mountains slowly
+            nearMountains.rotation.y += 0.001;
+            midMountains.rotation.y += 0.0008;
+            farMountains.rotation.y += 0.0005;
+            distantMountains.rotation.y += 0.0003;
+
+            // Animate particles
+            const positions = particles.geometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i + 1] += Math.sin(flightTime + i) * 0.1; // Floating motion
+                positions[i] += Math.cos(flightTime * 0.5 + i) * 0.05; // Drift
+                
+                // Reset particles that go too far
+                if (positions[i + 1] > 200) positions[i + 1] = -50;
+                if (positions[i + 1] < -100) positions[i + 1] = 200;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+
+            // Dynamic sky colors based on time
+            const skyColor = new THREE.Color();
+            const timeOfDay = (Math.sin(flightTime * 0.1) + 1) * 0.5; // 0 to 1
+            skyColor.setHSL(0.8 - timeOfDay * 0.3, 0.8, 0.3 + timeOfDay * 0.3);
+            renderer.setClearColor(skyColor);
+
+            // Update fog color to match sky
+            scene.fog.color.copy(skyColor);
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Debug: Log when rendering starts
+        console.log('🚀 Starting alien planet animation...');
+        console.log('Mountains created:', nearMountains.children.length);
+        console.log('Particles created:', particles.geometry.attributes.position.count);
+        console.log('Sun position:', sun.position);
+        console.log('Moon position:', moon.position);
+        console.log('Camera position:', camera.position);
+        
+        // Add a simple loading indicator that disappears after 3 seconds
+        const loadingDiv = document.createElement('div');
+        loadingDiv.innerHTML = '🌌 Rendering alien planet...';
+        loadingDiv.style.cssText = `
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            color: white; 
+            font-size: 24px; 
+            z-index: 9999;
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+        `;
+        document.body.appendChild(loadingDiv);
+        
+        setTimeout(() => {
+            if (loadingDiv.parentNode) {
+                loadingDiv.parentNode.removeChild(loadingDiv);
+            }
+            console.log('✅ Alien planet should be fully rendered now');
+        }, 3000);
+
+        // Start the journey
+        animate();
+    </script>
+</body>
+</html> 
