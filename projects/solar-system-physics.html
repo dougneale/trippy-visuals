@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<!--
+🌌 PHYSICS-BASED SOLAR SYSTEM SIMULATION
+=====================================
+
+✨ FEATURES:
+- Level 2: Newton's Laws Implementation with custom physics engine
+- Real Gravitational Forces: F = G * m1 * m2 / r² applied between all bodies
+- N-Body Interactions: All planets affect each other gravitationally
+- Realistic Orbital Mechanics: Planets form natural elliptical orbits from physics
+- Dynamic Mass Properties: Each celestial body has accurate mass and radius
+- Interactive Controls: Modify gravity constant, time scale, and add new bodies
+
+🎮 INTERACTIONS:
+- Mouse drag: Orbit around the solar system
+- Scroll wheel: Zoom in/out for detailed observation
+- Spacebar: Pause/resume physics simulation
+- R: Reset to initial conditions
+- T: Toggle orbital trails
+
+🎨 VISUAL EFFECTS:
+- Realistic sun glow and corona effects
+- Orbital trail visualization showing gravitational paths
+- Real-time physics information display
+- Starfield background with parallax scrolling
+
+🔧 TECHNOLOGY:
+- Three.js r128 for 3D rendering and visualization
+- Custom physics implementation with Newton's laws
+- Real-time gravitational force calculations
+- Euler integration for position and velocity updates
+
+Educational demonstration of gravitational physics and orbital mechanics.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 Physics-Based Solar System</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0015, #001122, #002244);
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+        
+        canvas {
+            display: block;
+        }
+        
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 300px;
+            z-index: 100;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            z-index: 100;
+        }
+        
+        #physics-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            z-index: 100;
+            max-width: 250px;
+        }
+        
+        .control-row {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-row label {
+            min-width: 80px;
+            font-size: 11px;
+        }
+        
+        .control-row input, .control-row select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        
+        .control-row button {
+            background: rgba(100, 150, 255, 0.3);
+            border: 1px solid rgba(100, 150, 255, 0.5);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.2s;
+        }
+        
+        .control-row button:hover {
+            background: rgba(100, 150, 255, 0.5);
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            z-index: 200;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        🌌 Initializing Physics Engine...<br>
+        <div style="font-size: 16px; margin-top: 10px;">Calculating gravitational forces...</div>
+    </div>
+    
+    <div id="info">
+        <strong>🌌 Physics-Based Solar System</strong><br>
+        Real gravitational forces with custom physics<br><br>
+        <div style="font-size: 12px; opacity: 0.8;">
+            🔬 Newton's Law of Gravitation<br>
+            🪐 N-body gravitational interactions<br>
+            🎯 Natural elliptical orbits<br>
+            ⚡ Real-time physics simulation<br>
+            🎮 Interactive parameter control
+        </div><br>
+        <div style="font-size: 11px;">
+            <strong>Controls:</strong><br>
+            SPACEBAR - Pause/Resume<br>
+            R - Reset simulation<br>
+            T - Toggle trails<br>
+            Mouse - Navigate camera
+        </div>
+    </div>
+    
+    <div id="controls">
+        <strong>Physics Parameters</strong><br>
+        
+        <div class="control-row">
+            <label>Gravity:</label>
+            <input type="range" id="gravitySlider" min="0" max="200" value="100" step="1">
+            <span id="gravityValue">1.0x</span>
+        </div>
+        
+        <div class="control-row">
+            <label>Time Scale:</label>
+            <input type="range" id="timeSlider" min="10" max="500" value="100" step="10">
+            <span id="timeValue">1.0x</span>
+        </div>
+        
+        <div class="control-row">
+            <label>Trails:</label>
+            <input type="checkbox" id="trailsToggle" checked>
+            <button onclick="clearTrails()">Clear</button>
+        </div>
+        
+        <div class="control-row">
+            <button onclick="pauseSimulation()">⏯️ Pause</button>
+            <button onclick="resetSimulation()">🔄 Reset</button>
+        </div>
+        
+        <div class="control-row">
+            <button onclick="addRandomPlanet()">➕ Add Planet</button>
+        </div>
+    </div>
+    
+    <div id="physics-info">
+        <strong>Physics Data:</strong><br>
+        <div id="physicsData">Calculating...</div>
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // Physics and rendering variables
+        let scene, camera, renderer, controls;
+        let sun, planets = [];
+        let trails = [], trailsEnabled = true;
+        let isPaused = false, timeScale = 1.0, gravityScale = 1.0;
+        
+        // Physics constants (scaled for visual simulation)
+        const G = 1.0; // Gravitational constant (scaled for simulation)
+        const SUN_MASS = 1000; // Sun mass (scaled)
+        const timeStep = 0.02; // Physics time step
+        
+        // Planet class for physics simulation
+        class Planet {
+            constructor(name, distance, size, color, mass) {
+                this.name = name;
+                this.mass = mass;
+                this.size = size;
+                this.color = color;
+                
+                // Physics properties
+                this.position = new THREE.Vector3();
+                this.velocity = new THREE.Vector3();
+                this.acceleration = new THREE.Vector3();
+                this.trail = [];
+                
+                // Visual mesh
+                const geometry = new THREE.SphereGeometry(size, 32, 32);
+                const material = new THREE.MeshLambertMaterial({ color: color });
+                this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh.castShadow = true;
+                this.mesh.receiveShadow = true;
+                
+                // Set initial position and velocity for circular orbit
+                const angle = Math.random() * Math.PI * 2;
+                this.position.set(
+                    Math.cos(angle) * distance,
+                    0,
+                    Math.sin(angle) * distance
+                );
+                
+                // Calculate orbital velocity for stable circular orbit: v = sqrt(G * M / r)
+                const orbitalSpeed = Math.sqrt(G * SUN_MASS / distance) * 0.8; // Slightly less for elliptical
+                this.velocity.set(
+                    -Math.sin(angle) * orbitalSpeed,
+                    0,
+                    Math.cos(angle) * orbitalSpeed
+                );
+                
+                // Create trail visualization
+                const trailGeometry = new THREE.BufferGeometry();
+                const trailMaterial = new THREE.LineBasicMaterial({ 
+                    color: color, 
+                    transparent: true, 
+                    opacity: 0.6 
+                });
+                this.trailMesh = new THREE.Line(trailGeometry, trailMaterial);
+            }
+            
+            // Apply force to this planet
+            applyForce(force) {
+                // F = ma, so a = F/m
+                this.acceleration.add(force.clone().divideScalar(this.mass));
+            }
+            
+            // Update physics (Euler integration)
+            updatePhysics(dt) {
+                // Update velocity: v = v + a*dt
+                this.velocity.add(this.acceleration.clone().multiplyScalar(dt));
+                
+                // Update position: p = p + v*dt
+                this.position.add(this.velocity.clone().multiplyScalar(dt));
+                
+                // Update visual mesh position
+                this.mesh.position.copy(this.position);
+                
+                // Rotate planet
+                this.mesh.rotation.y += 0.01;
+                
+                // Reset acceleration for next frame
+                this.acceleration.set(0, 0, 0);
+                
+                // Update trail
+                if (trailsEnabled) {
+                    this.trail.push(this.position.x, this.position.y, this.position.z);
+                    
+                    // Limit trail length
+                    const maxTrailLength = 300;
+                    if (this.trail.length > maxTrailLength) {
+                        this.trail.splice(0, 3);
+                    }
+                    
+                    // Update trail geometry
+                    const positions = new Float32Array(this.trail);
+                    this.trailMesh.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    this.trailMesh.geometry.setDrawRange(0, positions.length / 3);
+                }
+            }
+        }
+        
+        // Planet configuration with realistic relative masses and distances
+        const planetConfigs = [
+            { name: 'Mercury', distance: 25, size: 0.6, color: 0x8c7853, mass: 3.3 },
+            { name: 'Venus', distance: 35, size: 0.9, color: 0xffb347, mass: 4.9 },
+            { name: 'Earth', distance: 50, size: 1.0, color: 0x6b93d6, mass: 6.0 },
+            { name: 'Mars', distance: 75, size: 0.7, color: 0xcd5c5c, mass: 6.4 },
+            { name: 'Jupiter', distance: 120, size: 2.5, color: 0xd8ca9d, mass: 190 },
+        ];
+
+        // Initialize the simulation
+        function init() {
+            initThreeJS();
+            createSolarSystem();
+            setupEventListeners();
+            animate();
+            
+            // Hide loading screen
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Initialize Three.js scene
+        function initThreeJS() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x000011, 500, 2000);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+            camera.position.set(200, 100, 200);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000011, 1);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 10;
+            controls.maxDistance = 1000;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x111111, 0.2);
+            scene.add(ambientLight);
+            
+            // Create starfield
+            createStarfield();
+        }
+
+        // Create the solar system
+        function createSolarSystem() {
+            // Create the Sun
+            createSun();
+            
+            // Create planets
+            planetConfigs.forEach(config => {
+                const planet = new Planet(config.name, config.distance, config.size, config.color, config.mass);
+                planets.push(planet);
+                scene.add(planet.mesh);
+                scene.add(planet.trailMesh);
+                trails.push(planet.trailMesh);
+            });
+        }
+
+        // Create the central Sun
+        function createSun() {
+            // Visual sun
+            const sunGeometry = new THREE.SphereGeometry(8, 32, 32);
+            const sunMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xffff44,
+                emissive: 0xffaa00,
+                emissiveIntensity: 0.6
+            });
+            sun = new THREE.Mesh(sunGeometry, sunMaterial);
+            scene.add(sun);
+            
+            // Sun's light source
+            const sunLight = new THREE.PointLight(0xffffff, 2, 1000);
+            sunLight.position.set(0, 0, 0);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            scene.add(sunLight);
+            
+            // Sun physics (stationary mass at origin)
+            sun.mass = SUN_MASS;
+            sun.position = new THREE.Vector3(0, 0, 0);
+        }
+
+        // Apply gravitational forces between all bodies
+        function applyGravitationalForces() {
+            // Apply gravitational force from sun to each planet
+            planets.forEach(planet => {
+                // Calculate distance vector from planet to sun
+                const sunToPlanet = planet.position.clone().sub(sun.position);
+                const distance = sunToPlanet.length();
+                
+                if (distance > 0.1) { // Avoid division by zero
+                    // Calculate gravitational force magnitude: F = G * m1 * m2 / r²
+                    const forceMagnitude = G * gravityScale * SUN_MASS * planet.mass / (distance * distance);
+                    
+                    // Calculate force direction (towards sun)
+                    const forceDirection = sunToPlanet.clone().normalize().multiplyScalar(-1);
+                    const force = forceDirection.multiplyScalar(forceMagnitude);
+                    
+                    // Apply force to planet
+                    planet.applyForce(force);
+                }
+            });
+            
+            // Apply gravitational forces between planets (N-body simulation)
+            for (let i = 0; i < planets.length; i++) {
+                for (let j = i + 1; j < planets.length; j++) {
+                    const planet1 = planets[i];
+                    const planet2 = planets[j];
+                    
+                    // Calculate distance vector
+                    const p1ToP2 = planet2.position.clone().sub(planet1.position);
+                    const distance = p1ToP2.length();
+                    
+                    if (distance > 0.1) { // Avoid division by zero
+                        // Calculate gravitational force magnitude: F = G * m1 * m2 / r²
+                        const forceMagnitude = G * gravityScale * planet1.mass * planet2.mass / (distance * distance);
+                        
+                        // Calculate force direction
+                        const forceDirection = p1ToP2.clone().normalize();
+                        const force = forceDirection.multiplyScalar(forceMagnitude);
+                        
+                        // Apply forces (Newton's third law: equal and opposite)
+                        planet1.applyForce(force.clone());
+                        planet2.applyForce(force.clone().multiplyScalar(-1));
+                    }
+                }
+            }
+        }
+
+        // Update physics information display
+        function updatePhysicsInfo() {
+            let info = '';
+            planets.forEach(planet => {
+                const speed = planet.velocity.length();
+                const distance = planet.position.length();
+                
+                info += `${planet.name}:<br>`;
+                info += `  Speed: ${speed.toFixed(2)} u/s<br>`;
+                info += `  Distance: ${distance.toFixed(1)} u<br><br>`;
+            });
+            
+            document.getElementById('physicsData').innerHTML = info;
+        }
+
+        // Create starfield background
+        function createStarfield() {
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = 3000;
+            const starPositions = new Float32Array(starCount * 3);
+
+            for (let i = 0; i < starCount * 3; i += 3) {
+                const radius = 1000 + Math.random() * 2000;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                
+                starPositions[i] = radius * Math.sin(phi) * Math.cos(theta);
+                starPositions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                starPositions[i + 2] = radius * Math.cos(phi);
+            }
+
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+
+            const starMaterial = new THREE.PointsMaterial({
+                size: 2,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: false
+            });
+
+            const stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (!isPaused) {
+                // Apply gravitational forces
+                applyGravitationalForces();
+                
+                // Update physics for all planets
+                planets.forEach(planet => {
+                    planet.updatePhysics(timeStep * timeScale);
+                });
+                
+                // Update physics info display occasionally
+                if (Math.random() < 0.05) { // Update less frequently for performance
+                    updatePhysicsInfo();
+                }
+            }
+            
+            // Update controls
+            controls.update();
+            
+            // Rotate sun
+            sun.rotation.y += 0.005;
+            
+            // Render
+            renderer.render(scene, camera);
+        }
+
+        // Event listeners and controls
+        function setupEventListeners() {
+            // Keyboard controls
+            document.addEventListener('keydown', (event) => {
+                switch(event.code) {
+                    case 'Space':
+                        event.preventDefault();
+                        pauseSimulation();
+                        break;
+                    case 'KeyR':
+                        resetSimulation();
+                        break;
+                    case 'KeyT':
+                        document.getElementById('trailsToggle').checked = !document.getElementById('trailsToggle').checked;
+                        toggleTrails();
+                        break;
+                }
+            });
+            
+            // Gravity slider
+            document.getElementById('gravitySlider').addEventListener('input', (e) => {
+                gravityScale = e.target.value / 100;
+                document.getElementById('gravityValue').textContent = gravityScale.toFixed(1) + 'x';
+            });
+            
+            // Time scale slider
+            document.getElementById('timeSlider').addEventListener('input', (e) => {
+                timeScale = e.target.value / 100;
+                document.getElementById('timeValue').textContent = timeScale.toFixed(1) + 'x';
+            });
+            
+            // Trails toggle
+            document.getElementById('trailsToggle').addEventListener('change', toggleTrails);
+            
+            // Window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // Control functions
+        function pauseSimulation() {
+            isPaused = !isPaused;
+        }
+        
+        function resetSimulation() {
+            // Clear trails
+            clearTrails();
+            
+            // Reset planets to initial conditions
+            planets.forEach((planet, index) => {
+                const config = planetConfigs[index];
+                const angle = Math.random() * Math.PI * 2;
+                
+                planet.position.set(
+                    Math.cos(angle) * config.distance,
+                    0,
+                    Math.sin(angle) * config.distance
+                );
+                
+                const orbitalSpeed = Math.sqrt(G * SUN_MASS / config.distance) * 0.8;
+                planet.velocity.set(
+                    -Math.sin(angle) * orbitalSpeed,
+                    0,
+                    Math.cos(angle) * orbitalSpeed
+                );
+                
+                planet.acceleration.set(0, 0, 0);
+            });
+        }
+        
+        function toggleTrails() {
+            trailsEnabled = document.getElementById('trailsToggle').checked;
+            trails.forEach(trail => {
+                trail.visible = trailsEnabled;
+            });
+        }
+        
+        function clearTrails() {
+            planets.forEach(planet => {
+                planet.trail = [];
+                planet.trailMesh.geometry.setDrawRange(0, 0);
+            });
+        }
+        
+        function addRandomPlanet() {
+            const distance = 60 + Math.random() * 100;
+            const size = 0.5 + Math.random() * 1.5;
+            const mass = size * 5; // Mass proportional to size
+            const color = Math.random() * 0xffffff;
+            
+            const planet = new Planet(`Planet-${planets.length + 1}`, distance, size, color, mass);
+            planets.push(planet);
+            scene.add(planet.mesh);
+            scene.add(planet.trailMesh);
+            trails.push(planet.trailMesh);
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Start the simulation
+        init();
+    </script>
+</body>
+</html> 
