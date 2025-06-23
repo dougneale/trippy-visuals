@@ -3,541 +3,393 @@
 🎨 TRIPPY VISUALS GALLERY
 =====================================
 
-A curated collection of advanced Three.js visualizations exploring:
-- Realistic ecosystems and natural phenomena
-- Space environments and cosmic scenes
-- Mathematical patterns and geometric art
-- Interactive 3D experiences and simulations
+✨ FEATURES:
+- Interactive gallery of all visualization projects
+- Modern responsive design with Tailwind CSS
+- Preview thumbnails and descriptions
+- Quick access links to all visualizations
+- Project categorization and filtering
+- Search functionality for finding specific visuals
+- Mobile-optimized layout
 
-Each visualization demonstrates cutting-edge web graphics techniques
-including instanced rendering, PBR materials, particle systems,
-and advanced lighting for immersive digital experiences.
+🎮 INTERACTIONS:
+- Click cards to open visualizations
+- Search bar for filtering projects  
+- Category tabs for browsing by type
+- Responsive grid layout
+
+🎨 VISUAL EFFECTS:
+- Smooth hover animations
+- Modern card-based layout
+- Gradient backgrounds and effects
+- Clean typography and spacing
+
+🔧 TECHNOLOGY:
+- Tailwind CSS for styling
+- Vanilla JavaScript for interactions
+- Responsive design principles
+- Modern CSS Grid and Flexbox
+
+Central hub for exploring all trippy visual experiences,
+organized for easy browsing and discovery.
 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trippy Visuals - Interactive 3D Gallery</title>
+    <title>🎨 Trippy Visuals Gallery - Interactive 3D Experiences</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #fff;
-            overflow-x: hidden;
+        @keyframes glow {
+            from { box-shadow: 0 0 20px -10px #06b6d4; }
+            to { box-shadow: 0 0 30px 0px #06b6d4; }
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 50px;
-            padding: 40px 0;
-        }
-        
-        h1 {
-            font-size: 3.5em;
-            font-weight: 300;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 4s ease-in-out infinite;
-        }
-        
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
-        .subtitle {
-            font-size: 1.2em;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
-        
-        .description {
-            font-size: 1em;
-            opacity: 0.8;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s;
-        }
-        
-        .card:hover::before {
-            left: 100%;
-        }
-        
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-        
-        .card-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .card-icon {
-            font-size: 2em;
-            margin-right: 15px;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
-        }
-        
-        .card-title {
-            font-size: 1.4em;
-            font-weight: 600;
-            margin: 0;
-        }
-        
-        .card-subtitle {
-            font-size: 0.9em;
-            opacity: 0.8;
-            margin: 5px 0 15px 0;
-        }
-        
-        .card-description {
-            line-height: 1.6;
-            margin-bottom: 20px;
-            opacity: 0.9;
-        }
-        
-        .card-features {
-            list-style: none;
-            margin-bottom: 20px;
-        }
-        
-        .card-features li {
-            padding: 3px 0;
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-        
-        .card-features li::before {
-            content: '✨ ';
-            margin-right: 5px;
-        }
-        
-        .card-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            font-size: 0.9em;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
-        }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .dev-section {
-            margin-top: 60px;
-            padding: 30px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .dev-title {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #4ecdc4;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 60px;
-            padding: 30px;
-            opacity: 0.7;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .github-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: white;
-            text-decoration: none;
-            margin-top: 10px;
-            transition: opacity 0.3s ease;
-        }
-        
-        .github-link:hover {
-            opacity: 0.8;
-        }
-        
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5em; }
-            .gallery { grid-template-columns: 1fr; }
-            .container { padding: 15px; }
+        .hover-glow:hover {
+            animation: glow 2s ease-in-out infinite alternate;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Trippy Visuals</h1>
-            <div class="subtitle">Interactive 3D Experiences</div>
-            <div class="description">
-                A collection of advanced Three.js visualizations exploring realistic ecosystems, 
-                cosmic environments, mathematical patterns, and immersive digital art experiences.
-            </div>
-        </header>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen">
+    <!-- Header -->
+    <header class="container mx-auto px-6 py-8">
+        <div class="text-center">
+            <h1 class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-4 animate-float">
+                🎨 Trippy Visuals Gallery
+            </h1>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                Explore a collection of interactive 3D visualizations, WebGL experiences, 
+                and mind-bending digital art. Each piece is a unique journey into visual creativity.
+            </p>
+        </div>
+    </header>
 
-        <div class="gallery">
-            <!-- Enhanced Grass Ecosystem -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🌱</div>
-                    <div>
-                        <h3 class="card-title">Enhanced Grass Ecosystem</h3>
-                        <div class="card-subtitle">Multi-Species • Wildlife • Dynamic Weather</div>
-                    </div>
-                </div>
-                <div class="card-description">
-                    A living ecosystem with 60,000 grass blades across 3 species, 200 wildflowers, 
-                    and 15 flying insects. Features dynamic weather, time-of-day cycles, and 
-                    realistic wind simulation.
-                </div>
-                <ul class="card-features">
-                    <li>60,000+ instanced grass blades</li>
-                    <li>Butterflies and bees with flight patterns</li>
-                    <li>Dynamic lighting and weather</li>
-                    <li>Interactive disturbance effects</li>
-                </ul>
-                <div class="card-buttons">
-                    <a href="backups/enhanced-grass-ecosystem.html" class="btn btn-primary">
-                        🚀 Experience
-                    </a>
-                </div>
-            </div>
-
-            <!-- Simple Statue in Space -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🗿</div>
-                    <div>
-                        <h3 class="card-title">Statue in Space</h3>
-                        <div class="card-subtitle">Classical Sculpture • Cosmic Setting</div>
-                    </div>
-                </div>
-                <div class="card-description">
-                    A contemplative marble statue floating in the cosmic void, surrounded by 
-                    10,000 stars with dramatic three-point lighting and multiple mood settings.
-                </div>
-                <ul class="card-features">
-                    <li>Realistic marble PBR materials</li>
-                    <li>10,000 star procedural starfield</li>
-                    <li>4 dynamic lighting moods</li>
-                    <li>Floating cosmic particles</li>
-                </ul>
-                <div class="card-buttons">
-                    <a href="backups/simple-statue-in-space.html" class="btn btn-primary">
-                        🚀 Experience
-                    </a>
-                </div>
-            </div>
-
-            <!-- Solar System -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🪐</div>
-                    <div>
-                        <h3 class="card-title">Solar System Simulation</h3>
-                        <div class="card-subtitle">Realistic Orbital Mechanics</div>
-                    </div>
-                </div>
-                <div class="card-description">
-                    Complete solar system with 8 planets, moons, asteroid belt, and 5000-star 
-                    background. Features realistic orbital mechanics and dynamic lighting.
-                </div>
-                <ul class="card-features">
-                    <li>8 planets with realistic orbits</li>
-                    <li>Jupiter and Saturn ring systems</li>
-                    <li>Earth's moon with orbital animation</li>
-                    <li>Asteroid belt and starfield</li>
-                </ul>
-                <div class="card-buttons">
-                    <a href="backups/solar-system.html" class="btn btn-primary">
-                        🚀 Experience
-                    </a>
-                </div>
-            </div>
-
-            <!-- Alien Planet Flythrough -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🌌</div>
-                    <div>
-                        <h3 class="card-title">Alien Planet Flythrough</h3>
-                        <div class="card-subtitle">Cinematic Journey • Dual Celestial Events</div>
-                    </div>
-                </div>
-                <div class="card-description">
-                    Fly through an alien mountain landscape during simultaneous sunset and moonrise, 
-                    with atmospheric particles and dynamic sky color transitions.
-                </div>
-                <ul class="card-features">
-                    <li>Procedural mountain terrain</li>
-                    <li>Simultaneous sunset and moonrise</li>
-                    <li>2000 atmospheric particles</li>
-                    <li>Dynamic flight path controls</li>
-                </ul>
-                <div class="card-buttons">
-                    <a href="backups/alien-planet-detailed.html" class="btn btn-primary">
-                        🚀 Experience
-                    </a>
-                </div>
-            </div>
-
-            <!-- Synthwave Valley -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🌄</div>
-                    <div>
-                        <h3 class="card-title">Synthwave Valley</h3>
-                        <div class="card-subtitle">Retro-Futuristic • Valley Cruise</div>
-                    </div>
-                </div>
-                <div class="card-description">
-                    Cruise through a structured mountain valley with synthwave aesthetics, 
-                    banking effects, and atmospheric depth-based opacity fading.
-                </div>
-                <ul class="card-features">
-                    <li>Linear valley flight path</li>
-                    <li>Synthwave color palette</li>
-                    <li>Realistic banking effects</li>
-                    <li>Atmospheric perspective</li>
-                </ul>
-                <div class="card-buttons">
-                    <a href="backups/synthwave-valley-enhanced.html" class="btn btn-primary">
-                        🚀 Experience
-                    </a>
-                </div>
-            </div>
-
-            <!-- Mathematical Patterns -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🌀</div>
-                    <div>
-                        <h3 class="card-title">Mathematical Rainbow Spirals</h3>
-                        <div class="card-subtitle">Dynamic Patterns • Color Cycling</div>
-                    </div>
-                </div>
-                <div class="card-description">
-                    Contemplative mathematical visualization featuring golden ratio spirals, 
-                    polar roses, and parametric curves with dynamic rainbow color cycling.
-                </div>
-                <ul class="card-features">
-                    <li>Golden ratio mathematics</li>
-                    <li>5 dynamic color palettes</li>
-                    <li>Logarithmic and polar patterns</li>
-                    <li>Smooth animation cycles</li>
-                </ul>
-                <div class="card-buttons">
-                    <a href="backups/mathematical-rainbow-spirals.html" class="btn btn-primary">
-                        🚀 Experience
-                    </a>
-                </div>
-            </div>
-
-            <!-- 3D Sculpture Garden -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🎨</div>
-                    <div>
-                        <h3 class="card-title">3D Sculpture Garden</h3>
-                        <div class="card-subtitle">Floating Geometric Art</div>
-                    </div>
-                </div>
-                <div class="card-description">
-                    20 floating geometric sculptures with varied materials, dynamic lighting, 
-                    and 1000-particle system in an interactive 3D art gallery.
-                </div>
-                <ul class="card-features">
-                    <li>20 geometric sculptures</li>
-                    <li>4 different material types</li>
-                    <li>Dynamic 3D lighting system</li>
-                    <li>Interactive orbit controls</li>
-                </ul>
-                <div class="card-buttons">
-                    <a href="backups/threejs-floating-sculpture-garden.html" class="btn btn-primary">
-                        🚀 Experience
-                    </a>
-                </div>
-            </div>
-
-            <!-- Geometric Patterns -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">📐</div>
-                    <div>
-                        <h3 class="card-title">Geometric Angular Patterns</h3>
-                        <div class="card-subtitle">Right-Angle Focus • Tessellations</div>
-                    </div>
-                </div>
-                <div class="card-description">
-                    Explore recursive square subdivisions, Islamic tessellations, and 
-                    L-system fractals with a focus on right-angle geometric patterns.
-                </div>
-                <ul class="card-features">
-                    <li>Recursive square patterns</li>
-                    <li>Islamic tessellation designs</li>
-                    <li>L-system fractals</li>
-                    <li>Mobile-optimized shaders</li>
-                </ul>
-                <div class="card-buttons">
-                    <a href="backups/geometric-angular-patterns.html" class="btn btn-primary">
-                        🚀 Experience
-                    </a>
+    <!-- Search and Filter -->
+    <section class="container mx-auto px-6 mb-8">
+        <div class="max-w-2xl mx-auto">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    placeholder="Search visualizations..." 
+                    class="w-full px-4 py-3 pl-12 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                >
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
                 </div>
             </div>
         </div>
+    </section>
 
-        <div class="dev-section">
-            <h2 class="dev-title">
-                <span class="status-indicator"></span>
-                Development Sandbox
-            </h2>
-            <p>Active development workspace for creating new visualizations and experimenting with Three.js techniques.</p>
-            <div style="margin-top: 20px;">
-                <a href="sandbox.html" class="btn btn-secondary">
-                    🛠️ Open Sandbox
-                </a>
-                <a href="debug.html" class="btn btn-secondary">
-                    🐛 Debug Mode
+    <!-- Category Filters -->
+    <section class="container mx-auto px-6 mb-8">
+        <div class="flex flex-wrap justify-center gap-2">
+            <button class="filter-btn active px-4 py-2 bg-cyan-600 text-white rounded-full hover:bg-cyan-700 transition-colors" data-category="all">
+                All Projects
+            </button>
+            <button class="filter-btn px-4 py-2 bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 transition-colors" data-category="3d">
+                3D Scenes
+            </button>
+            <button class="filter-btn px-4 py-2 bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 transition-colors" data-category="particles">
+                Particle Systems
+            </button>
+            <button class="filter-btn px-4 py-2 bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 transition-colors" data-category="shaders">
+                Shaders & Effects
+            </button>
+            <button class="filter-btn px-4 py-2 bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 transition-colors" data-category="interactive">
+                Interactive
+            </button>
+        </div>
+    </section>
+
+    <!-- Visualizations Grid -->
+    <main class="container mx-auto px-6 pb-12">
+        <div id="visualizationsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- Active Development Version -->
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="current">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🚧 Current Development</h3>
+                    <span class="px-2 py-1 bg-green-600 text-white text-xs rounded-full">ACTIVE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Currently under development - check back for the latest visualization experiments</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full">Development</span>
+                    <span class="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">Experimental</span>
+                </div>
+                <p class="text-xs text-gray-400 mb-4">⚠️ This version may be unstable or incomplete</p>
+            </div>
+
+            <!-- Debug/Testing Version -->
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="3d">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🐬 Realistic Dolphin Model</h3>
+                    <span class="px-2 py-1 bg-orange-600 text-white text-xs rounded-full">DEBUG</span>
+                </div>
+                <p class="text-gray-300 mb-4">Anatomically accurate 3D dolphin model with realistic materials and lighting</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full">3D Modeling</span>
+                    <span class="px-2 py-1 bg-green-600/20 text-green-300 text-xs rounded-full">Three.js</span>
+                    <span class="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">PBR Materials</span>
+                </div>
+                <a href="debug.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    View Debug Version →
                 </a>
             </div>
-        </div>
 
-        <footer>
-            <p>Advanced Three.js visualizations exploring the intersection of mathematics, art, and interactive technology.</p>
-            <a href="https://github.com/dougneale/trippy-visuals" class="github-link" target="_blank">
-                <span>⭐</span> View on GitHub
-            </a>
-        </footer>
-    </div>
+            <!-- Sandbox Version -->
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="interactive">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🧪 Sandbox Experiments</h3>
+                    <span class="px-2 py-1 bg-yellow-600 text-white text-xs rounded-full">SANDBOX</span>
+                </div>
+                <p class="text-gray-300 mb-4">Experimental playground for testing new ideas and prototypes</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-yellow-600/20 text-yellow-300 text-xs rounded-full">Experimental</span>
+                    <span class="px-2 py-1 bg-red-600/20 text-red-300 text-xs rounded-full">Prototype</span>
+                </div>
+                <a href="sandbox.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Enter Sandbox →
+                </a>
+            </div>
+
+            <!-- Backed Up Visualizations -->
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="3d">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🏖️ Tropical Beach Paradise</h3>
+                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">COMPLETE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Interactive beach scene with palm trees, bouncing beach balls, and ocean waves</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full">Ocean Simulation</span>
+                    <span class="px-2 py-1 bg-green-600/20 text-green-300 text-xs rounded-full">Physics</span>
+                    <span class="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">Interactive</span>
+                </div>
+                <a href="backups/tropical-beach-paradise.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Visit Beach →
+                </a>
+            </div>
+
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="3d">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🌿 Enhanced Grass Ecosystem</h3>
+                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">COMPLETE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Lush grass field with wind physics and realistic lighting</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-green-600/20 text-green-300 text-xs rounded-full">Nature</span>
+                    <span class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full">Wind Physics</span>
+                </div>
+                <a href="backups/enhanced-grass-ecosystem.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Enter Grassland →
+                </a>
+            </div>
+
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="shaders">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🌈 Mathematical Rainbow Spirals</h3>
+                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">COMPLETE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Hypnotic spiraling patterns with rainbow color cycling</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">Mathematics</span>
+                    <span class="px-2 py-1 bg-pink-600/20 text-pink-300 text-xs rounded-full">Spirals</span>
+                </div>
+                <a href="backups/mathematical-rainbow-spirals.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Enter Spirals →
+                </a>
+            </div>
+
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="3d">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🌌 Solar System</h3>
+                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">COMPLETE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Interactive 3D solar system with orbital mechanics</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full">Space</span>
+                    <span class="px-2 py-1 bg-yellow-600/20 text-yellow-300 text-xs rounded-full">Astronomy</span>
+                    <span class="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">Physics</span>
+                </div>
+                <a href="backups/solar-system.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Explore Space →
+                </a>
+            </div>
+
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="3d">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🗿 Simple Statue in Space</h3>
+                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">COMPLETE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Minimalist 3D statue floating in cosmic space</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-gray-600/20 text-gray-300 text-xs rounded-full">Minimalist</span>
+                    <span class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full">Space</span>
+                </div>
+                <a href="backups/simple-statue-in-space.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    View Statue →
+                </a>
+            </div>
+
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="shaders">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🔺 Geometric Angular Patterns</h3>
+                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">COMPLETE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Sharp geometric patterns with dynamic transformations</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-red-600/20 text-red-300 text-xs rounded-full">Geometric</span>
+                    <span class="px-2 py-1 bg-orange-600/20 text-orange-300 text-xs rounded-full">Patterns</span>
+                </div>
+                <a href="backups/geometric-angular-patterns.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    View Patterns →
+                </a>
+            </div>
+
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="3d">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🏔️ Synthwave Valley Enhanced</h3>
+                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">COMPLETE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Retro-futuristic valley with neon aesthetics</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-pink-600/20 text-pink-300 text-xs rounded-full">Synthwave</span>
+                    <span class="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">Neon</span>
+                    <span class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full">Retro</span>
+                </div>
+                <a href="backups/synthwave-valley-enhanced.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Enter Valley →
+                </a>
+            </div>
+
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="3d">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🛸 Alien Planet Detailed</h3>
+                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">COMPLETE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Detailed alien world with exotic landscapes</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-green-600/20 text-green-300 text-xs rounded-full">Alien</span>
+                    <span class="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">Sci-Fi</span>
+                    <span class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full">Detailed</span>
+                </div>
+                <a href="backups/alien-planet-detailed.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Visit Planet →
+                </a>
+            </div>
+
+            <div class="visualization-card bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-600 rounded-xl p-6 hover:border-cyan-400 transition-all duration-300 hover-glow" data-category="3d interactive">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">🎨 Floating Sculpture Garden</h3>
+                    <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">COMPLETE</span>
+                </div>
+                <p class="text-gray-300 mb-4">Abstract floating sculptures in a peaceful garden setting</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">Abstract</span>
+                    <span class="px-2 py-1 bg-green-600/20 text-green-300 text-xs rounded-full">Peaceful</span>
+                    <span class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full">Interactive</span>
+                </div>
+                <a href="backups/threejs-floating-sculpture-garden.html" class="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Enter Garden →
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="container mx-auto px-6 py-8 border-t border-gray-700">
+        <div class="text-center">
+            <p class="text-gray-400 mb-4">
+                🎨 Trippy Visuals Gallery - A collection of interactive 3D experiences
+            </p>
+            <p class="text-sm text-gray-500">
+                Built with Three.js, WebGL, and creative passion | 
+                <span class="text-cyan-400">index.html is now permanently the gallery</span>
+            </p>
+        </div>
+    </footer>
 
     <script>
-        // Add some interactive sparkle to the page
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const cards = document.querySelectorAll('.visualization-card');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+
+        let currentCategory = 'all';
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            filterCards(searchTerm, currentCategory);
+        });
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Update active button
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-cyan-600');
+                    btn.classList.add('bg-gray-700', 'text-gray-300');
+                });
+                
+                this.classList.add('active', 'bg-cyan-600');
+                this.classList.remove('bg-gray-700', 'text-gray-300');
+                this.classList.add('text-white');
+
+                currentCategory = this.dataset.category;
+                filterCards(searchInput.value.toLowerCase(), currentCategory);
+            });
+        });
+
+        function filterCards(searchTerm, category) {
+            cards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                const categories = card.dataset.category;
+                
+                const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
+                const matchesCategory = category === 'all' || categories.includes(category);
+
+                if (matchesSearch && matchesCategory) {
+                    card.style.display = 'block';
+                    card.classList.add('animate-float');
+                } else {
+                    card.style.display = 'none';
+                    card.classList.remove('animate-float');
+                }
+            });
+        }
+
+        // Add some dynamic effects
         document.addEventListener('DOMContentLoaded', function() {
-            // Smooth scroll for internal links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                });
+            // Stagger card animations
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
             });
 
-            // Add loading states to buttons
-            document.querySelectorAll('.btn-primary').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const originalText = this.innerHTML;
-                    this.innerHTML = '🚀 Loading...';
-                    this.style.opacity = '0.7';
-                    
-                    // Reset after a short delay (in case user goes back)
-                    setTimeout(() => {
-                        this.innerHTML = originalText;
-                        this.style.opacity = '1';
-                    }, 2000);
-                });
+            // Add parallax effect to header
+            window.addEventListener('scroll', function() {
+                const scrolled = window.pageYOffset;
+                const header = document.querySelector('header');
+                header.style.transform = `translateY(${scrolled * 0.5}px)`;
             });
-
-            console.log('🎨 Trippy Visuals Gallery Loaded');
-            console.log('🚀 Ready to explore interactive 3D experiences');
         });
     </script>
 </body>
-</html> 
+</html>

@@ -68,7 +68,6 @@
 
 - **INCREMENTAL DEVELOPMENT**: Make changes step-by-step, testing each increment
 - **ALWAYS check for JavaScript errors** using `./check-js-errors.sh` after EACH code change
-- **ALWAYS capture screenshots** using `./capture-3d-screenshot.sh` after each working increment
 - This provides immediate feedback on whether each step is working correctly
 - Allows user to see step-by-step progress rather than waiting until the end
 - Catches JavaScript errors early before they compound
@@ -143,11 +142,19 @@
 
 ### File Structure:
 
-- `index.html` - Active development version
-- `debug.html` - Simplified testing version
+- `index.html` - **PERMANENT GALLERY** - Interactive list of all visualizations using Tailwind CSS
+- `debug.html` - Simplified testing version for current experiments
+- `sandbox.html` - Experimental playground for prototyping
 - `backups/` - All previous versions with descriptive names
 - `README.md` - Project overview and script usage
 - Server utility scripts for development workflow
+
+### ⚠️ IMPORTANT: INDEX.HTML IS NOW THE GALLERY
+
+- **index.html is permanently the project gallery** - never overwrite with a visualization
+- All visualizations should be developed in `debug.html`, `sandbox.html`, or directly as backup files
+- When a visualization is complete, create a descriptive backup and add it to the gallery
+- The gallery uses Tailwind CSS from CDN and provides an organized view of all projects
 
 ### Quality Assurance:
 

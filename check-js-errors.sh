@@ -1,7 +1,11 @@
 #!/bin/bash
 
+# Default to index.html if no parameter provided
+TARGET_FILE=${1:-index.html}
+
 echo "🔍 JavaScript Error Detection"
 echo "============================"
+echo "📄 Checking: $TARGET_FILE"
 
 # Check if server is running
 if ! curl -s http://localhost:8000 > /dev/null; then
@@ -13,7 +17,7 @@ fi
 echo "✅ Server is responding"
 
 # Create a simple HTML page that loads our visualization and captures errors
-cat > /tmp/error_checker.html << 'EOF'
+cat > /tmp/error_checker.html << EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,13 +43,13 @@ cat > /tmp/error_checker.html << 'EOF'
             errorCount++;
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error';
-            errorDiv.innerHTML = `❌ ERROR ${errorCount}: ${e.message}<br>File: ${e.filename}:${e.lineno}:${e.colno}`;
+            errorDiv.innerHTML = '❌ ERROR ' + errorCount + ': ' + e.message + '<br>File: ' + e.filename + ':' + e.lineno + ':' + e.colno;
             document.getElementById('errors').appendChild(errorDiv);
         });
         
         // Load the main visualization in an iframe
         const iframe = document.createElement('iframe');
-        iframe.src = 'http://localhost:8000/index.html';
+        iframe.src = 'http://localhost:8000/$TARGET_FILE';
         iframe.style.width = '1px';
         iframe.style.height = '1px';
         iframe.style.opacity = '0';
@@ -57,7 +61,7 @@ cat > /tmp/error_checker.html << 'EOF'
                 if (errorCount === 0) {
                     document.getElementById('status').innerHTML = '<div class="success">✅ No JavaScript errors detected!</div>';
                 } else {
-                    document.getElementById('status').innerHTML = `<div class="error">❌ Found ${errorCount} JavaScript error(s)</div>`;
+                    document.getElementById('status').innerHTML = '<div class="error">❌ Found ' + errorCount + ' JavaScript error(s)</div>';
                 }
             }, 3000); // Wait 3 seconds for page to fully load
         };
@@ -99,7 +103,7 @@ echo ""
 echo "🔧 To manually check:"
 echo "  1. Open browser developer tools (F12)"
 echo "  2. Go to Console tab"
-echo "  3. Visit: http://localhost:8000/index.html"
+echo "  3. Visit: http://localhost:8000/$TARGET_FILE"
 echo "  4. Look for red error messages"
 
 # Cleanup
